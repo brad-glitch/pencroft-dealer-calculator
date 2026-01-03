@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencroft Dealer Calculator</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://pencroft.co/wp-content/uploads/2023/10/cropped-PNC_Icon_OneColor-Sage_RGB.png" id="favicon">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Work+Sans:wght@300;400;500;600&display=swap');
+        :root{--primary:#2C5F2D;--secondary:#97BC62;--accent:#8B4513;--warm:#F5DEB3;--bg:#FAF9F6;--card:#FFF;--text:#2D2D2D;--text-light:#666;--border:#E5E5E5;--shadow:rgba(44,95,45,0.08)}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Work Sans',sans-serif;background:linear-gradient(135deg,var(--bg) 0%,#F0EDE5 100%);color:var(--text);min-height:100vh;padding-bottom:80px}
+        .header{background:linear-gradient(135deg,var(--primary) 0%,#1E4620 100%);color:#fff;padding:1.5rem 1rem;box-shadow:0 4px 20px var(--shadow);position:sticky;top:0;z-index:100}
+        .header h1{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;margin-bottom:0.25rem}
+        .header p{font-size:0.9rem;opacity:0.9}
+        .admin-btn{position:absolute;top:1.5rem;right:1rem;background:rgba(255,255,255,0.2);border:2px solid #fff;color:#fff;padding:0.5rem 1rem;border-radius:8px;cursor:pointer;font-size:0.9rem;transition:all .3s}
+        .admin-btn:hover{background:rgba(255,255,255,0.3)}
+        .container{max-width:1400px;margin:0 auto;padding:1.5rem 1rem}
+        .tabs{display:flex;gap:0.5rem;margin-bottom:2rem;overflow-x:auto}
+        .tab{background:#fff;border:2px solid var(--border);padding:0.75rem 1.5rem;border-radius:8px;cursor:pointer;transition:all .3s;white-space:nowrap;font-weight:500}
+        .tab:hover{border-color:var(--secondary);transform:translateY(-2px)}
+        .tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .structure-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem}
+        .structure-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px var(--shadow);cursor:pointer;transition:all .3s;border:2px solid transparent}
+        .structure-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(44,95,45,0.15);border-color:var(--secondary)}
+        .structure-image{height:180px;background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);display:flex;align-items:center;justify-content:center;font-size:3rem;color:#fff}
+        .structure-info{padding:1.25rem}
+        .structure-title{font-family:'DM Serif Display',serif;font-size:1.35rem;color:var(--primary);margin-bottom:0.5rem}
+        .structure-desc{font-size:0.9rem;color:var(--text-light)}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:1000;overflow-y:auto}
+        .modal.active{display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem}
+        .modal-content{background:#fff;border-radius:20px;max-width:1100px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp .3s ease;max-height:90vh;display:flex;flex-direction:column}
+        @keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+        .modal-header{background:linear-gradient(135deg,var(--primary) 0%,#1E4620 100%);color:#fff;padding:2rem;border-radius:20px 20px 0 0}
+        .modal-header h2{font-family:'DM Serif Display',serif;font-size:2rem}
+        .modal-body{padding:2rem;overflow-y:auto;flex:1}
+        .form-group{margin-bottom:1.5rem}
+        .form-label{display:block;font-weight:500;margin-bottom:0.5rem}
+        .form-input,.form-select{width:100%;padding:0.75rem 1rem;border:2px solid var(--border);border-radius:8px;font-size:1rem;font-family:'Work Sans',sans-serif}
+        .form-input:focus,.form-select:focus{outline:none;border-color:var(--primary)}
+        .options-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem}
+        .option-card{background:#fff;border:2px solid var(--border);border-radius:12px;padding:1rem;text-align:center;cursor:pointer;transition:all .3s}
+        .option-card:hover{border-color:var(--secondary);transform:scale(1.05)}
+        .option-card.selected{border-color:var(--primary);background:rgba(44,95,45,0.05)}
+        .option-label{font-weight:500;margin-bottom:0.5rem;font-size:0.95rem}
+        .option-price{font-size:1.1rem;color:var(--primary);font-weight:600}
+        .upgrade-category{margin-bottom:2rem;border:1px solid var(--border);border-radius:12px;padding:1.5rem;background:#fafafa}
+        .category-header{font-size:1.1rem;font-weight:600;color:var(--primary);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid var(--border)}
+        .upgrade-item{background:#fff;border:2px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;gap:1rem}
+        .upgrade-info{flex:1;min-width:0}
+        .upgrade-info h4{font-weight:600;margin-bottom:0.25rem;font-size:0.9rem}
+        .upgrade-info p{font-size:0.85rem;color:var(--text-light)}
+        .upgrade-controls{display:flex;align-items:center;gap:0.5rem;flex-shrink:0}
+        .qty-input{width:60px;padding:0.5rem;border:2px solid var(--border);border-radius:6px;text-align:center;font-size:0.95rem}
+        .upgrade-price{font-size:1rem;font-weight:600;color:var(--primary);min-width:90px;text-align:right}
+        .button-group{display:flex;gap:1rem;margin-top:2rem;padding-top:1rem;border-top:2px solid var(--border)}
+        .btn{flex:1;padding:1rem 2rem;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .3s;font-family:'Work Sans',sans-serif}
+        .btn-primary{background:linear-gradient(135deg,var(--primary) 0%,#1E4620 100%);color:#fff}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(44,95,45,0.3)}
+        .btn-secondary{background:#fff;color:var(--primary);border:2px solid var(--primary)}
+        .btn-success{background:linear-gradient(135deg,#28a745 0%,#20833a 100%);color:#fff}
+        .quote-summary{background:linear-gradient(135deg,#FFF9E6 0%,#FFE8BF 100%);border-radius:16px;padding:2rem;margin-top:2rem}
+        .quote-header{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--accent);margin-bottom:1.5rem;text-align:center}
+        .quote-line{display:flex;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid rgba(139,69,19,0.2)}
+        .quote-line:last-child{border-bottom:none;padding-top:1rem;margin-top:1rem;border-top:2px solid var(--accent)}
+        .quote-item{font-weight:500}
+        .quote-price{font-weight:600;color:var(--accent)}
+        .quote-total{font-size:1.5rem;font-family:'DM Serif Display',serif}
+        .dealer-quote{background:linear-gradient(135deg,#E8F5E9 0%,#C8E6C9 100%);border-radius:16px;padding:2rem;margin-top:1.5rem}
+        .dealer-quote .quote-header{color:var(--primary)}
+        .quote-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:2rem}
+        .logo-upload{border:2px dashed var(--border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all .3s}
+        .logo-upload:hover{border-color:var(--primary);background:rgba(44,95,45,0.02)}
+        .logo-preview{max-width:200px;max-height:100px;margin:1rem auto;display:none}
+        .admin-panel{display:none;padding:2rem;background:#fff;border-radius:12px;margin-top:2rem;box-shadow:0 4px 16px var(--shadow)}
+        .admin-panel.active{display:block}
+        @media (max-width:768px){
+            .structure-grid{grid-template-columns:1fr}
+            .options-grid{grid-template-columns:repeat(2,1fr)}
+            .button-group{flex-direction:column}
+            .upgrade-item{flex-direction:column;align-items:flex-start}
+            .upgrade-controls{width:100%;justify-content:space-between}
+            .quote-actions{grid-template-columns:1fr}
+        }
+        /* Password Protection */
+        .password-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);z-index:9999;display:flex;align-items:center;justify-content:center}
+        .password-overlay.hidden{display:none}
+        .password-box{background:linear-gradient(135deg,#fff 0%,#f8f8f8 100%);border-radius:24px;padding:3rem;box-shadow:0 20px 60px rgba(0,0,0,0.4);max-width:450px;width:90%;animation:fadeIn 0.5s ease}
+        @keyframes fadeIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+        .password-header{text-align:center;margin-bottom:2rem}
+        .password-header h1{font-family:'DM Serif Display',serif;color:var(--primary);font-size:2.2rem;margin-bottom:0.5rem}
+        .password-header p{color:var(--text-light);font-size:1rem}
+        .password-input-group{margin-bottom:1.5rem}
+        .password-input{width:100%;padding:1rem 1.5rem;border:2px solid var(--border);border-radius:12px;font-size:1.1rem;font-family:'Work Sans',sans-serif;transition:all .3s}
+        .password-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(44,95,45,0.1)}
+        .password-submit{width:100%;padding:1rem 2rem;background:linear-gradient(135deg,var(--primary) 0%,#1E4620 100%);color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all .3s;font-family:'Work Sans',sans-serif}
+        .password-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(44,95,45,0.3)}
+        .password-error{color:#dc3545;font-size:0.9rem;margin-top:0.5rem;display:none;text-align:center}
+        .password-error.show{display:block;animation:shake 0.5s}
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+        body.locked{overflow:hidden}
+        body.locked .header,body.locked .container{filter:blur(8px);pointer-events:none}
+    </style>
+</head>
+<body class="locked">
+    <!-- Password Protection -->
+    <div id="passwordOverlay" class="password-overlay">
+        <div class="password-box">
+            <div class="password-header">
+                <h1>🔐 Dealer Access</h1>
+                <p>Enter password to access calculator</p>
+            </div>
+            <form id="passwordForm" onsubmit="return false;">
+                <div class="password-input-group">
+                    <input 
+                        type="password" 
+                        id="passwordInput" 
+                        class="password-input" 
+                        placeholder="Enter password"
+                        autocomplete="off"
+                        autofocus
+                    >
+                </div>
+                <button type="button" onclick="checkPassword()" class="password-submit">Unlock Calculator</button>
+                <div id="passwordError" class="password-error">Incorrect password. Please try again.</div>
+            </form>
+        </div>
+    </div>
+    
+    
+    <div class="header">
+        <h1>🏡 Pencroft Dealer Calculator</h1>
+        <p>Professional B2B Pricing Tool</p>
+        <button class="admin-btn" onclick="toggleAdmin()">🔐 Admin</button>
+    </div>
+
+    <div class="container">
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="admin-panel">
+            <h2 style="margin-bottom:1.5rem">Admin Panel</h2>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-input" id="adminPassword" placeholder="Enter admin password">
+            </div>
+            <button class="btn btn-primary" onclick="loginAdmin()">Login</button>
+            
+            <div id="adminContent" style="display:none;margin-top:2rem">
+                <h3 style="margin-bottom:1rem">Site Settings</h3>
+                <div class="form-group">
+                    <label class="form-label">Upload Favicon (170x170 PNG recommended)</label>
+                    <input type="file" class="form-input" accept="image/*" onchange="uploadFavicon(event)">
+                    <small style="color:var(--text-light);display:block;margin-top:0.5rem">Upload your Pencroft logo to replace the favicon</small>
+                </div>
+                
+                <h3 style="margin-top:2rem;margin-bottom:1rem">Pricing Management</h3>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="downloadPricingCSV()">📥 Download Pricing CSV</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('pricingUpload').click()">📤 Upload Pricing CSV</button>
+                </div>
+                <input type="file" id="pricingUpload" accept=".csv" style="display:none" onchange="uploadPricingCSV(event)">
+                
+                <div style="margin-top:2rem">
+                    <h3 style="margin-bottom:1rem">Edit Pricing</h3>
+                    <p style="color:var(--text-light);margin-bottom:1rem">Download pricing as CSV, edit in Excel/Google Sheets, and re-upload</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('pavilions')">🏛️ Pavilions</button>
+            <button class="tab" onclick="switchTab('pergolas')">🌿 Pergolas</button>
+        </div>
+
+        <div id="pavilions-section" class="structure-section">
+            <div class="structure-grid">
+                <div class="structure-card" onclick="openCalculator('pavilions','hip')">
+                    <div class="structure-image">🏛️</div>
+                    <div class="structure-info">
+                        <div class="structure-title">Hip Roof Pavilion</div>
+                        <div class="structure-desc">Classic four-sided hip roof design - 30 sizes</div>
+                    </div>
+                </div>
+                <div class="structure-card" onclick="openCalculator('pavilions','aframe')">
+                    <div class="structure-image">⛺</div>
+                    <div class="structure-info">
+                        <div class="structure-title">A-Frame Pavilion</div>
+                        <div class="structure-desc">Traditional peaked roof style - 45 sizes</div>
+                    </div>
+                </div>
+                <div class="structure-card" onclick="openCalculator('pavilions','leanto')">
+                    <div class="structure-image">🏠</div>
+                    <div class="structure-info">
+                        <div class="structure-title">Lean-To Pavilion</div>
+                        <div class="structure-desc">Single-slope attached design - 35 sizes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="pergolas-section" class="structure-section" style="display:none">
+            <div class="structure-grid">
+                <div class="structure-card" onclick="openCalculator('pergolas','classic')">
+                    <div class="structure-image">🌿</div>
+                    <div class="structure-info">
+                        <div class="structure-title">Classic Pergola</div>
+                        <div class="structure-desc">Timeless open-rafter design - 30 sizes</div>
+                    </div>
+                </div>
+                <div class="structure-card" onclick="openCalculator('pergolas','superior')">
+                    <div class="structure-image">✨</div>
+                    <div class="structure-info">
+                        <div class="structure-title">Superior Pergola</div>
+                        <div class="structure-desc">Enhanced premium detailing - 29 sizes</div>
+                    </div>
+                </div>
+                <div class="structure-card" onclick="openCalculator('pergolas','modern')">
+                    <div class="structure-image">🏗️</div>
+                    <div class="structure-info">
+                        <div class="structure-title">Modern Pergola</div>
+                        <div class="structure-desc">Contemporary sleek aesthetic - 30 sizes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="calculatorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Configure Structure</h2>
+            </div>
+            <div class="modal-body">
+                <div id="step1">
+                    <h3 style="margin-bottom:1rem">Structure Configuration</h3>
+                    <div class="form-group">
+                        <label class="form-label">Size *</label>
+                        <select class="form-select" id="sizeSelect" onchange="updatePricing()">
+                            <option value="">Choose size...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="materialGroup" style="display:none">
+                        <label class="form-label">Material *</label>
+                        <div class="options-grid" id="materialOptions"></div>
+                    </div>
+                    
+                    <div class="form-group" id="colorGroup" style="display:none">
+                        <label class="form-label">Color/Finish *</label>
+                        <select class="form-select" id="colorSelect" onchange="updateColorPricing()">
+                            <option value="">Choose color/finish...</option>
+                        </select>
+                        <div id="colorPriceInfo" style="margin-top:0.5rem;color:var(--primary);font-weight:600"></div>
+                    </div>
+                    
+                    <div class="form-group" id="roofGroup" style="display:none">
+                        <label class="form-label">Roof Option</label>
+                        <div class="options-grid" id="roofOptions"></div>
+                    </div>
+                    
+                    <div class="form-group" id="ceilingGroup" style="display:none">
+                        <label class="form-label">Ceiling Option</label>
+                        <div class="options-grid" id="ceilingOptions"></div>
+                    </div>
+                </div>
+                
+                <div id="step2" style="display:none">
+                    <h3 style="margin-bottom:1.5rem">Additional Upgrades</h3>
+                    <p style="color:var(--text-light);margin-bottom:1.5rem">Select quantity for desired upgrades</p>
+                    <div id="upgradesContainer"></div>
+                </div>
+                
+                <div id="step3" style="display:none">
+                    <h3 style="margin-bottom:1rem">Delivery & Installation</h3>
+                    <div class="form-group">
+                        <label class="form-label">Option *</label>
+                        <select class="form-select" id="deliveryOption" onchange="updateDeliveryFields()">
+                            <option value="">Choose option...</option>
+                            <option value="delivery">Delivery Only</option>
+                            <option value="installation">Full Installation</option>
+                            <option value="custom">Custom Price</option>
+                        </select>
+                    </div>
+                    <div id="deliveryFields" style="display:none">
+                        <div class="form-group">
+                            <label class="form-label">Distance (miles)</label>
+                            <input type="number" class="form-input" id="deliveryDistance" placeholder="0" min="0" step="0.1" onchange="calculateDelivery()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Calculated Price</label>
+                            <input type="number" class="form-input" id="deliveryPrice" readonly style="background:#f5f5f5">
+                        </div>
+                    </div>
+                    <div id="customFields" style="display:none">
+                        <div class="form-group">
+                            <label class="form-label">Custom Price</label>
+                            <input type="number" class="form-input" id="customPrice" placeholder="$0.00" min="0" step="0.01">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="step4" style="display:none">
+                    <div class="quote-summary">
+                        <h3 class="quote-header">Dealer Cost Breakdown</h3>
+                        <div id="dealerQuote"></div>
+                    </div>
+                    <div class="form-group" style="margin-top:2rem">
+                        <label class="form-label">Dealer Markup % (minimum 35%)</label>
+                        <input type="number" class="form-input" id="dealerMarkup" placeholder="35" min="35" max="200" step="1" value="35" onchange="updateCustomerQuote()">
+                    </div>
+                    <div class="dealer-quote">
+                        <h3 class="quote-header">Customer Quote Price</h3>
+                        <div id="customerQuote"></div>
+                    </div>
+                    
+                    <div class="quote-actions">
+                        <button class="btn btn-success" onclick="showQuoteDetails()">💾 Save & Format Quote</button>
+                        <button class="btn btn-success" onclick="emailQuote()">📧 Email Quote</button>
+                        <button class="btn btn-success" onclick="placeOrder()">📝 Place Order</button>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="backBtn" onclick="previousStep()" style="display:none">← Back</button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
+                    <button class="btn btn-secondary" onclick="closeCalculator()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quote Details Modal -->
+    <div id="quoteDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Complete Quote Information</h2>
+            </div>
+            <div class="modal-body">
+                <h3 style="margin-bottom:1rem">Dealer Information</h3>
+                <div class="form-group">
+                    <label class="form-label">Company Name</label>
+                    <input type="text" class="form-input" id="dealerCompany" placeholder="Your company name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Name</label>
+                    <input type="text" class="form-input" id="dealerContact" placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="dealerEmail" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-input" id="dealerPhone" placeholder="(555) 555-5555">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Upload Your Logo (Optional)</label>
+                    <div class="logo-upload" onclick="document.getElementById('logoUpload').click()">
+                        <p>Click to upload logo</p>
+                        <small style="color:var(--text-light)">PNG, JPG up to 2MB</small>
+                    </div>
+                    <input type="file" id="logoUpload" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+                    <img id="logoPreview" class="logo-preview" alt="Logo preview">
+                </div>
+                
+                <h3 style="margin:2rem 0 1rem">Customer Information</h3>
+                <div class="form-group">
+                    <label class="form-label">Customer Name</label>
+                    <input type="text" class="form-input" id="customerName" placeholder="Customer name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Customer Email</label>
+                    <input type="email" class="form-input" id="customerEmail" placeholder="customer@email.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Customer Phone</label>
+                    <input type="tel" class="form-input" id="customerPhone" placeholder="(555) 555-5555">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Customer Address</label>
+                    <textarea class="form-input" id="customerAddress" rows="3" placeholder="Street address, City, State ZIP"></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="generateFormattedQuote()">Generate Quote PDF</button>
+                    <button class="btn btn-secondary" onclick="closeQuoteDetails()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const PRICING_DATA={"pavilions": {"hip": {"name": "Hip Roof Pavilion", "sizes": [{"size": "10 x 10", "posts": 4, "wood": 4614.0, "vinyl": 5501.0, "timberwood": 4800.0, "ribbedMetal": 636.0, "standingSeam": 1300.0, "tgCeiling": 660.0, "vinylSoffit": 680.0, "sqft": 100}, {"size": "10 x 12", "posts": 4, "wood": 4874.0, "vinyl": 5862.0, "timberwood": 5280.0, "ribbedMetal": 763.0, "standingSeam": 1560.0, "tgCeiling": 792.0, "vinylSoffit": 816.0, "sqft": 120}, {"size": "10 x 14", "posts": 4, "wood": 5130.0, "vinyl": 6248.0, "timberwood": 5600.0, "ribbedMetal": 890.0, "standingSeam": 1820.0, "tgCeiling": 924.0, "vinylSoffit": 952.0, "sqft": 140}, {"size": "10 x 16", "posts": 4, "wood": 5386.0, "vinyl": 6603.0, "timberwood": 6080.0, "ribbedMetal": 1018.0, "standingSeam": 2080.0, "tgCeiling": 1056.0, "vinylSoffit": 1088.0, "sqft": 160}, {"size": "10 x 18", "posts": 4, "wood": 5642.0, "vinyl": 7067.0, "timberwood": 6480.0, "ribbedMetal": 1145.0, "standingSeam": 2340.0, "tgCeiling": 1188.0, "vinylSoffit": 1224.0, "sqft": 180}, {"size": "12 x 12", "posts": 4, "wood": 5294.0, "vinyl": 6221.0, "timberwood": 5760.0, "ribbedMetal": 916.0, "standingSeam": 1872.0, "tgCeiling": 950.0, "vinylSoffit": 979.2, "sqft": 144}, {"size": "12 x 14", "posts": 4, "wood": 5574.0, "vinyl": 6554.0, "timberwood": 6216.0, "ribbedMetal": 1068.0, "standingSeam": 2184.0, "tgCeiling": 1109.0, "vinylSoffit": 1142.4, "sqft": 168}, {"size": "12 x 16", "posts": 4, "wood": 5850.0, "vinyl": 7085.0, "timberwood": 6720.0, "ribbedMetal": 1221.0, "standingSeam": 2496.0, "tgCeiling": 1267.0, "vinylSoffit": 1305.6, "sqft": 192}, {"size": "12 x 18", "posts": 4, "wood": 6128.0, "vinyl": 7418.0, "timberwood": 7128.0, "ribbedMetal": 1374.0, "standingSeam": 2808.0, "tgCeiling": 1426.0, "vinylSoffit": 1468.8, "sqft": 216}, {"size": "12 x 20", "posts": 6, "wood": 7238.0, "vinyl": 8772.0, "timberwood": 8160.0, "ribbedMetal": 1526.0, "standingSeam": 3120.0, "tgCeiling": 1584.0, "vinylSoffit": 1632.0, "sqft": 240}, {"size": "14 x 14", "posts": 4, "wood": 6030.0, "vinyl": 7007.0, "timberwood": 6664.0, "ribbedMetal": 1247.0, "standingSeam": 2548.0, "tgCeiling": 1294.0, "vinylSoffit": 1332.8, "sqft": 196}, {"size": "14 x 16", "posts": 4, "wood": 6328.0, "vinyl": 7407.0, "timberwood": 7168.0, "ribbedMetal": 1425.0, "standingSeam": 2912.0, "tgCeiling": 1478.0, "vinylSoffit": 1523.2, "sqft": 224}, {"size": "14 x 18", "posts": 4, "wood": 6626.0, "vinyl": 7838.0, "timberwood": 7812.0, "ribbedMetal": 1603.0, "standingSeam": 3276.0, "tgCeiling": 1663.0, "vinylSoffit": 1713.6, "sqft": 252}, {"size": "14 x 20", "posts": 6, "wood": 7756.0, "vinyl": 9139.0, "timberwood": 8960.0, "ribbedMetal": 1781.0, "standingSeam": 3640.0, "tgCeiling": 1848.0, "vinylSoffit": 1904.0, "sqft": 280}, {"size": "14 x 22", "posts": 6, "wood": 8056.0, "vinyl": 9502.0, "timberwood": 9548.0, "ribbedMetal": 1959.0, "standingSeam": 4004.0, "tgCeiling": 2033.0, "vinylSoffit": 2094.4, "sqft": 308}, {"size": "16 x 16", "posts": 4, "wood": 6850.0, "vinyl": 7854.0, "timberwood": 7680.0, "ribbedMetal": 1628.0, "standingSeam": 3328.0, "tgCeiling": 1690.0, "vinylSoffit": 1740.8, "sqft": 256}, {"size": "16 x 18", "posts": 4, "wood": 7170.0, "vinyl": 8233.0, "timberwood": 8352.0, "ribbedMetal": 1832.0, "standingSeam": 3744.0, "tgCeiling": 1901.0, "vinylSoffit": 1958.4, "sqft": 288}, {"size": "16 x 20", "posts": 6, "wood": 8320.0, "vinyl": 9556.0, "timberwood": 9600.0, "ribbedMetal": 2035.0, "standingSeam": 4160.0, "tgCeiling": 2112.0, "vinylSoffit": 2176.0, "sqft": 320}, {"size": "16 x 22", "posts": 6, "wood": 8640.0, "vinyl": 10181.0, "timberwood": 10208.0, "ribbedMetal": 2239.0, "standingSeam": 4576.0, "tgCeiling": 2323.0, "vinylSoffit": 2393.6, "sqft": 352}, {"size": "16 x 24", "posts": 6, "wood": 8958.0, "vinyl": 10576.0, "timberwood": 12288.0, "ribbedMetal": 2442.0, "standingSeam": 4992.0, "tgCeiling": 2534.0, "vinylSoffit": 2611.2, "sqft": 384}, {"size": "18 x 18", "posts": 4, "wood": 8314.0, "vinyl": 8677.0, "timberwood": 10044.0, "ribbedMetal": 2061.0, "standingSeam": 4212.0, "tgCeiling": 2138.0, "vinylSoffit": 2203.2, "sqft": 324}, {"size": "18 x 20", "posts": 6, "wood": 9582.0, "vinyl": 10262.0, "timberwood": 11520.0, "ribbedMetal": 2290.0, "standingSeam": 4680.0, "tgCeiling": 2376.0, "vinylSoffit": 2448.0, "sqft": 360}, {"size": "18 x 22", "posts": 6, "wood": 9960.0, "vinyl": 10643.0, "timberwood": 11880.0, "ribbedMetal": 2519.0, "standingSeam": 5148.0, "tgCeiling": 2614.0, "vinylSoffit": 2692.8, "sqft": 396}, {"size": "18 x 24", "posts": 6, "wood": 10338.0, "vinyl": 11192.0, "timberwood": 12528.0, "ribbedMetal": 2748.0, "standingSeam": 5616.0, "tgCeiling": 2851.0, "vinylSoffit": 2937.6, "sqft": 432}, {"size": "18 x 26", "posts": 6, "wood": 10718.0, "vinyl": 11593.0, "timberwood": 13572.0, "ribbedMetal": 2976.0, "standingSeam": 6084.0, "tgCeiling": 3089.0, "vinylSoffit": 3182.4, "sqft": 468}, {"size": "20 x 20", "posts": 8, "wood": 11910.0, "vinyl": 11297.0, "timberwood": 13200.0, "ribbedMetal": 2544.0, "standingSeam": 5200.0, "tgCeiling": 2640.0, "vinylSoffit": 2720.0, "sqft": 400}, {"size": "20 x 22", "posts": 8, "wood": 12340.0, "vinyl": 11831.0, "timberwood": 14080.0, "ribbedMetal": 2798.0, "standingSeam": 5720.0, "tgCeiling": 2904.0, "vinylSoffit": 2992.0, "sqft": 440}, {"size": "20 x 24", "posts": 8, "wood": 12772.0, "vinyl": 12299.0, "timberwood": 14880.0, "ribbedMetal": 3053.0, "standingSeam": 6240.0, "tgCeiling": 3168.0, "vinylSoffit": 3264.0, "sqft": 480}, {"size": "20 x 26", "posts": 8, "wood": 13204.0, "vinyl": 12877.0, "timberwood": 15600.0, "ribbedMetal": 3307.0, "standingSeam": 6760.0, "tgCeiling": 3432.0, "vinylSoffit": 3536.0, "sqft": 520}, {"size": "20 x 28", "posts": 8, "wood": 13634.0, "vinyl": 13317.0, "timberwood": 16240.0, "ribbedMetal": 3562.0, "standingSeam": 7280.0, "tgCeiling": 3696.0, "vinylSoffit": 3808.0, "sqft": 560}], "upgrades": {"Cupolas": [{"name": "Louvered", "wood": 250.0, "vinyl": 298.0, "timberwood": 250.0}, {"name": "Windowed", "wood": 250.0, "vinyl": 298.0, "timberwood": 250.0}], "Beams": [{"name": "Arched Beam (Per Linear Foot) - Span 1'-18' without center post", "wood": 10.0, "vinyl": 12.92, "timberwood": 0}, {"name": "Straight Beam (Per Linear Foot) - Span 18'-24' without center post", "wood": 22.5, "vinyl": 25.0, "timberwood": 0}, {"name": "Arched Beam (Per Linear Foot) - Span 18'-24' without center post", "wood": 32.5, "vinyl": 35.0, "timberwood": 0}, {"name": "Straight 8\"x10\" (Per Linear Foot)", "wood": 0, "vinyl": 0, "timberwood": 7.26}], "Trim Braces": [{"name": "Modern Trim (Per Post)", "wood": 160.0, "vinyl": 38.0, "timberwood": 0}, {"name": "8\" Square Post Trim (Per Post)", "wood": 0, "vinyl": 54.0, "timberwood": 0}], "Molding": [{"name": "Dentil Molding (Per Linear Foot)", "wood": 3.68, "vinyl": 4.34, "timberwood": 0}], "Roof": [{"name": "Flash to House (Siding) (Per Linear Foot)", "wood": 20.0, "vinyl": 30.0, "timberwood": 0}, {"name": "Attach to House (Per Linear Foot)", "wood": 40.0, "vinyl": 50.0, "timberwood": 0}], "Posts": [{"name": "Add 7\" Square", "wood": 428.0, "vinyl": 0, "timberwood": 0}, {"name": "Add 8\" Post", "wood": 0, "vinyl": 464.0, "timberwood": 352.0}, {"name": "Higher 1\" - 24\" (Per Post)", "wood": 86.0, "vinyl": 72.0, "timberwood": 40.0}, {"name": "Higher 25\" - 48\" (Per Post)", "wood": 164.0, "vinyl": 104.0, "timberwood": 80.0}, {"name": "Upgrade 9\" Square (Per Post)", "wood": 184.0, "vinyl": 0, "timberwood": 0}, {"name": "Upgrade 10\" Square (Per Post)", "wood": 0, "vinyl": 0, "timberwood": 98.0}, {"name": "Upgrade 10\" Rnd. (Per Post)Tapered Superior", "wood": 0, "vinyl": 364.0, "timberwood": 0}, {"name": "Upgrade 8\" Sq. Royal (Per Post)", "wood": 0, "vinyl": 208.0, "timberwood": 0}, {"name": "Upgrade 12\" Sq. Royal (Per Post)", "wood": 0, "vinyl": 284.0, "timberwood": 0}], "Privacy Walls- To find square feet, multiply the length of the wall by 8 (our standard height for a wall). Select 2 below for interior and exteriorwall finish. (Vinyl 4\" Dutch Lap, Pine T&G Siding, Pine Nickel Gap Siding, LP Lap Siding)": [{"name": "Privacy Wall for Pavilion", "wood": 15.0, "vinyl": 15.0, "timberwood": 15.0}], "Windows": [{"name": "24x36 AluminumSingle Hung", "wood": 88.0, "vinyl": 88.0, "timberwood": 88.0}, {"name": "30x36 AluminumSingle Hung", "wood": 106.0, "vinyl": 106.0, "timberwood": 106.0}, {"name": "30x54 AluminumSingle Hung", "wood": 128.0, "vinyl": 128.0, "timberwood": 128.0}, {"name": "24x10 AluminumTransom", "wood": 66.0, "vinyl": 66.0, "timberwood": 66.0}, {"name": "30x10 AluminumTransom", "wood": 72.0, "vinyl": 72.0, "timberwood": 72.0}], "Floor": [{"name": "Wood Floor-Pine(Sqft Pricing)", "wood": 12.0, "vinyl": 12.0, "timberwood": 12.0}, {"name": "Composite Floor (Sqft Pricing)", "wood": 16.0, "vinyl": 16.0, "timberwood": 16.0}], "Electical": [{"name": "Standard Package", "wood": 210.0, "vinyl": 210.0, "timberwood": 210.0}, {"name": "Additional (Per Unit)", "wood": 60.0, "vinyl": 60.0, "timberwood": 60.0}], "Fasteners & Brackets": [{"name": "Cortex Screws with Plugs (Per Linear Foot)", "wood": 0, "vinyl": 5.4, "timberwood": 0}], "Crickets": [{"name": "Cricket Cutout (Linear Foot)", "wood": 250.0, "vinyl": 300.0, "timberwood": 0}]}}, "aframe": {"name": "A-Frame Pavilion", "sizes": [{"size": "10 x 10", "posts": 4, "wood": 4430.0, "vinyl": 5744.0, "timberwood": 4830.0, "ribbedMetal": 528.0, "standingSeam": 1344.0, "tgCeiling": 328.0, "vinylSoffit": 320.0, "sqft": 100}, {"size": "10 x 12", "posts": 4, "wood": 4768.0, "vinyl": 6054.0, "timberwood": 5235.0, "ribbedMetal": 554.0, "standingSeam": 1502.0, "tgCeiling": 371.0, "vinylSoffit": 384.0, "sqft": 120}, {"size": "10 x 14", "posts": 4, "wood": 5104.0, "vinyl": 6440.0, "timberwood": 5642.0, "ribbedMetal": 580.0, "standingSeam": 1662.0, "tgCeiling": 415.0, "vinylSoffit": 448.0, "sqft": 140}, {"size": "10 x 16", "posts": 4, "wood": 5442.0, "vinyl": 6750.0, "timberwood": 6049.0, "ribbedMetal": 608.0, "standingSeam": 1820.0, "tgCeiling": 459.0, "vinylSoffit": 512.0, "sqft": 160}, {"size": "10 x 18", "posts": 4, "wood": 5778.0, "vinyl": 7214.0, "timberwood": 6456.0, "ribbedMetal": 630.0, "standingSeam": 1978.0, "tgCeiling": 502.0, "vinylSoffit": 576.0, "sqft": 180}, {"size": "12 x 10", "posts": 4, "wood": 4762.0, "vinyl": 5968.0, "timberwood": 5246.0, "ribbedMetal": 564.0, "standingSeam": 1494.0, "tgCeiling": 371.0, "vinylSoffit": 384.0, "sqft": 120}, {"size": "12 x 12", "posts": 4, "wood": 5134.0, "vinyl": 6377.0, "timberwood": 5706.0, "ribbedMetal": 596.0, "standingSeam": 1678.0, "tgCeiling": 424.0, "vinylSoffit": 460.8, "sqft": 144}, {"size": "12 x 14", "posts": 4, "wood": 5504.0, "vinyl": 6710.0, "timberwood": 6164.0, "ribbedMetal": 628.0, "standingSeam": 1862.0, "tgCeiling": 476.0, "vinylSoffit": 537.6, "sqft": 168}, {"size": "12 x 16", "posts": 4, "wood": 5876.0, "vinyl": 7197.0, "timberwood": 6624.0, "ribbedMetal": 660.0, "standingSeam": 2046.0, "tgCeiling": 529.0, "vinylSoffit": 614.4, "sqft": 192}, {"size": "12 x 18", "posts": 4, "wood": 6248.0, "vinyl": 7530.0, "timberwood": 7082.0, "ribbedMetal": 690.0, "standingSeam": 2228.0, "tgCeiling": 581.0, "vinylSoffit": 691.2, "sqft": 216}, {"size": "12 x 20", "posts": 6, "wood": 7452.0, "vinyl": 8790.0, "timberwood": 8252.0, "ribbedMetal": 724.0, "standingSeam": 2412.0, "tgCeiling": 633.0, "vinylSoffit": 768.0, "sqft": 240}, {"size": "14 x 10", "posts": 4, "wood": 5094.0, "vinyl": 6753.0, "timberwood": 5665.0, "ribbedMetal": 638.0, "standingSeam": 1678.0, "tgCeiling": 415.0, "vinylSoffit": 448.0, "sqft": 140}, {"size": "14 x 12", "posts": 4, "wood": 5500.0, "vinyl": 7153.0, "timberwood": 6173.0, "ribbedMetal": 674.0, "standingSeam": 1888.0, "tgCeiling": 476.0, "vinylSoffit": 537.6, "sqft": 168}, {"size": "14 x 14", "posts": 4, "wood": 5906.0, "vinyl": 7707.0, "timberwood": 6679.0, "ribbedMetal": 712.0, "standingSeam": 2096.0, "tgCeiling": 537.0, "vinylSoffit": 627.2, "sqft": 196}, {"size": "14 x 16", "posts": 4, "wood": 6312.0, "vinyl": 8106.0, "timberwood": 7185.0, "ribbedMetal": 750.0, "standingSeam": 2306.0, "tgCeiling": 598.0, "vinylSoffit": 716.8, "sqft": 224}, {"size": "14 x 18", "posts": 4, "wood": 6718.0, "vinyl": 8582.0, "timberwood": 7694.0, "ribbedMetal": 786.0, "standingSeam": 2514.0, "tgCeiling": 660.0, "vinylSoffit": 806.4, "sqft": 252}, {"size": "14 x 20", "posts": 6, "wood": 7956.0, "vinyl": 9968.0, "timberwood": 8910.0, "ribbedMetal": 824.0, "standingSeam": 2722.0, "tgCeiling": 721.0, "vinylSoffit": 896.0, "sqft": 280}, {"size": "14 x 22", "posts": 6, "wood": 8362.0, "vinyl": 10635.0, "timberwood": 9416.0, "ribbedMetal": 862.0, "standingSeam": 2932.0, "tgCeiling": 782.0, "vinylSoffit": 985.6, "sqft": 308}, {"size": "16 x 10", "posts": 4, "wood": 5456.0, "vinyl": 7018.0, "timberwood": 6118.0, "ribbedMetal": 710.0, "standingSeam": 1862.0, "tgCeiling": 459.0, "vinylSoffit": 512.0, "sqft": 160}, {"size": "16 x 12", "posts": 4, "wood": 5896.0, "vinyl": 7594.0, "timberwood": 6675.0, "ribbedMetal": 752.0, "standingSeam": 2096.0, "tgCeiling": 529.0, "vinylSoffit": 614.4, "sqft": 192}, {"size": "16 x 14", "posts": 4, "wood": 6336.0, "vinyl": 8016.0, "timberwood": 7229.0, "ribbedMetal": 796.0, "standingSeam": 2332.0, "tgCeiling": 598.0, "vinylSoffit": 716.8, "sqft": 224}, {"size": "16 x 16", "posts": 4, "wood": 6776.0, "vinyl": 8515.0, "timberwood": 7783.0, "ribbedMetal": 840.0, "standingSeam": 2566.0, "tgCeiling": 668.0, "vinylSoffit": 819.2, "sqft": 256}, {"size": "16 x 18", "posts": 4, "wood": 7218.0, "vinyl": 8937.0, "timberwood": 8340.0, "ribbedMetal": 882.0, "standingSeam": 2800.0, "tgCeiling": 738.0, "vinylSoffit": 921.6, "sqft": 288}, {"size": "16 x 20", "posts": 6, "wood": 8490.0, "vinyl": 10356.0, "timberwood": 9589.0, "ribbedMetal": 926.0, "standingSeam": 3034.0, "tgCeiling": 808.0, "vinylSoffit": 1024.0, "sqft": 320}, {"size": "16 x 22", "posts": 6, "wood": 8930.0, "vinyl": 11285.0, "timberwood": 10145.0, "ribbedMetal": 970.0, "standingSeam": 3268.0, "tgCeiling": 878.0, "vinylSoffit": 1126.4, "sqft": 352}, {"size": "16 x 24", "posts": 6, "wood": 9370.0, "vinyl": 11680.0, "timberwood": 10700.0, "ribbedMetal": 1012.0, "standingSeam": 3502.0, "tgCeiling": 948.0, "vinylSoffit": 1228.8, "sqft": 384}, {"size": "18 x 10", "posts": 4, "wood": 6346.0, "vinyl": 7446.0, "timberwood": 7222.0, "ribbedMetal": 780.0, "standingSeam": 2046.0, "tgCeiling": 502.0, "vinylSoffit": 576.0, "sqft": 180}, {"size": "18 x 12", "posts": 4, "wood": 6868.0, "vinyl": 7891.0, "timberwood": 7891.0, "ribbedMetal": 828.0, "standingSeam": 2306.0, "tgCeiling": 581.0, "vinylSoffit": 691.2, "sqft": 216}, {"size": "18 x 14", "posts": 4, "wood": 7386.0, "vinyl": 8412.0, "timberwood": 8563.0, "ribbedMetal": 878.0, "standingSeam": 2566.0, "tgCeiling": 660.0, "vinylSoffit": 806.4, "sqft": 252}, {"size": "18 x 16", "posts": 4, "wood": 7908.0, "vinyl": 8858.0, "timberwood": 9235.0, "ribbedMetal": 930.0, "standingSeam": 2826.0, "tgCeiling": 738.0, "vinylSoffit": 921.6, "sqft": 288}, {"size": "18 x 18", "posts": 4, "wood": 8432.0, "vinyl": 9303.0, "timberwood": 9906.0, "ribbedMetal": 978.0, "standingSeam": 3084.0, "tgCeiling": 817.0, "vinylSoffit": 1036.8, "sqft": 324}, {"size": "18 x 20", "posts": 6, "wood": 9842.0, "vinyl": 10983.0, "timberwood": 11337.0, "ribbedMetal": 1028.0, "standingSeam": 3344.0, "tgCeiling": 895.0, "vinylSoffit": 1152.0, "sqft": 360}, {"size": "18 x 22", "posts": 6, "wood": 10364.0, "vinyl": 11669.0, "timberwood": 12006.0, "ribbedMetal": 1078.0, "standingSeam": 3604.0, "tgCeiling": 974.0, "vinylSoffit": 1267.2, "sqft": 396}, {"size": "18 x 24", "posts": 6, "wood": 10886.0, "vinyl": 12217.0, "timberwood": 12678.0, "ribbedMetal": 1128.0, "standingSeam": 3864.0, "tgCeiling": 1053.0, "vinylSoffit": 1382.4, "sqft": 432}, {"size": "18 x 26", "posts": 6, "wood": 11408.0, "vinyl": 12707.0, "timberwood": 13349.0, "ribbedMetal": 1178.0, "standingSeam": 4124.0, "tgCeiling": 1131.0, "vinylSoffit": 1497.6, "sqft": 468}, {"size": "20 x 10", "posts": 4, "wood": 7346.0, "vinyl": 7904.0, "timberwood": 8418.0, "ribbedMetal": 852.0, "standingSeam": 2230.0, "tgCeiling": 546.0, "vinylSoffit": 640.0, "sqft": 200}, {"size": "20 x 12", "posts": 4, "wood": 7946.0, "vinyl": 8448.0, "timberwood": 9198.0, "ribbedMetal": 908.0, "standingSeam": 2514.0, "tgCeiling": 633.0, "vinylSoffit": 768.0, "sqft": 240}, {"size": "20 x 14", "posts": 4, "wood": 8546.0, "vinyl": 8961.0, "timberwood": 9975.0, "ribbedMetal": 962.0, "standingSeam": 2800.0, "tgCeiling": 721.0, "vinylSoffit": 896.0, "sqft": 280}, {"size": "20 x 16", "posts": 4, "wood": 9148.0, "vinyl": 9429.0, "timberwood": 10753.0, "ribbedMetal": 1020.0, "standingSeam": 3086.0, "tgCeiling": 808.0, "vinylSoffit": 1024.0, "sqft": 320}, {"size": "20 x 18", "posts": 4, "wood": 9748.0, "vinyl": 10180.0, "timberwood": 11530.0, "ribbedMetal": 1074.0, "standingSeam": 3370.0, "tgCeiling": 895.0, "vinylSoffit": 1152.0, "sqft": 360}, {"size": "20 x 20", "posts": 6, "wood": 11300.0, "vinyl": 11667.0, "timberwood": 13119.0, "ribbedMetal": 1130.0, "standingSeam": 3654.0, "tgCeiling": 983.0, "vinylSoffit": 1280.0, "sqft": 400}, {"size": "20 x 22", "posts": 6, "wood": 11900.0, "vinyl": 12282.0, "timberwood": 13897.0, "ribbedMetal": 1186.0, "standingSeam": 3940.0, "tgCeiling": 1070.0, "vinylSoffit": 1408.0, "sqft": 440}, {"size": "20 x 24", "posts": 6, "wood": 12500.0, "vinyl": 12750.0, "timberwood": 14674.0, "ribbedMetal": 1242.0, "standingSeam": 4226.0, "tgCeiling": 1158.0, "vinylSoffit": 1536.0, "sqft": 480}, {"size": "20 x 26", "posts": 6, "wood": 13100.0, "vinyl": 13417.0, "timberwood": 15451.0, "ribbedMetal": 1298.0, "standingSeam": 4510.0, "tgCeiling": 1245.0, "vinylSoffit": 1664.0, "sqft": 520}, {"size": "20 x 28", "posts": 6, "wood": 13700.0, "vinyl": 13857.0, "timberwood": 16229.0, "ribbedMetal": 1354.0, "standingSeam": 4794.0, "tgCeiling": 1332.0, "vinylSoffit": 1792.0, "sqft": 560}], "upgrades": {"Cupolas": [{"name": "Louvered", "wood": 250.0, "vinyl": 298.0, "timberwood": 250.0}, {"name": "Windowed", "wood": 250.0, "vinyl": 298.0, "timberwood": 250.0}], "Beams": [{"name": "Arched Beam (Per Linear Foot) - Span 1'-18' without center post", "wood": 10.0, "vinyl": 12.92, "timberwood": 0}, {"name": "Straight Beam (Per Linear Foot) - Span 18'-24' without center post", "wood": 22.5, "vinyl": 25.0, "timberwood": 0}, {"name": "Arched Beam (Per Linear Foot) - Span 18'-24' without center post", "wood": 32.5, "vinyl": 35.0, "timberwood": 0}, {"name": "Straight 8\"x10\" (Per Linear Foot)", "wood": 0, "vinyl": 0, "timberwood": 7.26}], "Trim Braces": [{"name": "Modern Trim (Per Post)", "wood": 160.0, "vinyl": 38.0, "timberwood": 0}, {"name": "8\" Square Post Trim (Per Post)", "wood": 0, "vinyl": 54.0, "timberwood": 0}], "Molding": [{"name": "Dentil Molding (Per Linear Foot)", "wood": 3.68, "vinyl": 4.34, "timberwood": 0}], "Roof": [{"name": "Flash to House (Siding) (Per Linear Foot)", "wood": 20.0, "vinyl": 30.0, "timberwood": 0}, {"name": "Attach to House (Per Linear Foot)", "wood": 40.0, "vinyl": 50.0, "timberwood": 0}], "Posts": [{"name": "Add 7\" Square", "wood": 428.0, "vinyl": 0, "timberwood": 0}, {"name": "Add 8\" Post", "wood": 0, "vinyl": 464.0, "timberwood": 352.0}, {"name": "Higher 1\" - 24\" (Per Post)", "wood": 86.0, "vinyl": 72.0, "timberwood": 40.0}, {"name": "Higher 25\" - 48\" (Per Post)", "wood": 164.0, "vinyl": 104.0, "timberwood": 80.0}, {"name": "Upgrade 9\" Square (Per Post)", "wood": 184.0, "vinyl": 0, "timberwood": 0}, {"name": "Upgrade 10\" Square (Per Post)", "wood": 0, "vinyl": 0, "timberwood": 98.0}, {"name": "Upgrade 10\" Rnd. (Per Post)Tapered Superior", "wood": 0, "vinyl": 364.0, "timberwood": 0}, {"name": "Upgrade 8\" Sq. Royal (Per Post)", "wood": 0, "vinyl": 208.0, "timberwood": 0}, {"name": "Upgrade 12\" Sq. Royal (Per Post)", "wood": 0, "vinyl": 284.0, "timberwood": 0}], "Privacy Walls- To find square feet, multiply the length of the wall by 8 (our standard height for a wall). Select 2 below for interior and exteriorwall finish. (Vinyl 4\" Dutch Lap, Pine T&G Siding, Pine Nickel Gap Siding, LP Lap Siding)": [{"name": "Privacy Wall for Pavilion", "wood": 15.0, "vinyl": 15.0, "timberwood": 15.0}], "Windows": [{"name": "24x36 AluminumSingle Hung", "wood": 88.0, "vinyl": 88.0, "timberwood": 88.0}, {"name": "30x36 AluminumSingle Hung", "wood": 106.0, "vinyl": 106.0, "timberwood": 106.0}, {"name": "30x54 AluminumSingle Hung", "wood": 128.0, "vinyl": 128.0, "timberwood": 128.0}, {"name": "24x10 AluminumTransom", "wood": 66.0, "vinyl": 66.0, "timberwood": 66.0}, {"name": "30x10 AluminumTransom", "wood": 72.0, "vinyl": 72.0, "timberwood": 72.0}], "Floor": [{"name": "Wood Floor-Pine(Sqft Pricing)", "wood": 12.0, "vinyl": 12.0, "timberwood": 12.0}, {"name": "Composite Floor (Sqft Pricing)", "wood": 16.0, "vinyl": 16.0, "timberwood": 16.0}], "Electical": [{"name": "Standard Package", "wood": 210.0, "vinyl": 210.0, "timberwood": 210.0}, {"name": "Additional (Per Unit)", "wood": 60.0, "vinyl": 60.0, "timberwood": 60.0}], "Fasteners & Brackets": [{"name": "Cortex Screws with Plugs (Per Linear Foot)", "wood": 0, "vinyl": 5.4, "timberwood": 0}], "Crickets": [{"name": "Cricket Cutout (Linear Foot)", "wood": 250.0, "vinyl": 300.0, "timberwood": 0}]}}, "leanto": {"name": "Lean-To Pavilion", "sizes": [{"size": "10 x 10", "posts": 4, "wood": 4124.0, "vinyl": 4589.0, "timberwood": 4292.0, "ribbedMetal": 608.0, "standingSeam": 1192.0, "tgCeiling": 480.0, "vinylSoffit": 495.0, "sqft": 100}, {"size": "10 x 12", "posts": 4, "wood": 4414.0, "vinyl": 4829.0, "timberwood": 4646.0, "ribbedMetal": 644.0, "standingSeam": 1328.0, "tgCeiling": 576.0, "vinylSoffit": 594.0, "sqft": 120}, {"size": "10 x 14", "posts": 4, "wood": 4704.0, "vinyl": 5146.0, "timberwood": 5003.0, "ribbedMetal": 682.0, "standingSeam": 1466.0, "tgCeiling": 672.0, "vinylSoffit": 693.0, "sqft": 140}, {"size": "10 x 16", "posts": 4, "wood": 4996.0, "vinyl": 5386.0, "timberwood": 5359.0, "ribbedMetal": 718.0, "standingSeam": 1604.0, "tgCeiling": 768.0, "vinylSoffit": 792.0, "sqft": 160}, {"size": "10 x 18", "posts": 4, "wood": 5286.0, "vinyl": 5779.0, "timberwood": 5713.0, "ribbedMetal": 756.0, "standingSeam": 1740.0, "tgCeiling": 864.0, "vinylSoffit": 891.0, "sqft": 180}, {"size": "12 x 10", "posts": 4, "wood": 4416.0, "vinyl": 4779.0, "timberwood": 4648.0, "ribbedMetal": 640.0, "standingSeam": 1326.0, "tgCeiling": 576.0, "vinylSoffit": 594.0, "sqft": 120}, {"size": "12 x 12", "posts": 4, "wood": 4740.0, "vinyl": 5115.0, "timberwood": 5049.0, "ribbedMetal": 682.0, "standingSeam": 1486.0, "tgCeiling": 691.0, "vinylSoffit": 712.8, "sqft": 144}, {"size": "12 x 14", "posts": 4, "wood": 5066.0, "vinyl": 5375.0, "timberwood": 5449.0, "ribbedMetal": 726.0, "standingSeam": 1646.0, "tgCeiling": 806.0, "vinylSoffit": 831.6, "sqft": 168}, {"size": "12 x 16", "posts": 4, "wood": 5390.0, "vinyl": 5788.0, "timberwood": 5849.0, "ribbedMetal": 768.0, "standingSeam": 1806.0, "tgCeiling": 922.0, "vinylSoffit": 950.4, "sqft": 192}, {"size": "12 x 18", "posts": 4, "wood": 5716.0, "vinyl": 6048.0, "timberwood": 6249.0, "ribbedMetal": 810.0, "standingSeam": 1966.0, "tgCeiling": 1037.0, "vinylSoffit": 1069.2, "sqft": 216}, {"size": "12 x 20", "posts": 6, "wood": 6940.0, "vinyl": 7232.0, "timberwood": 7415.0, "ribbedMetal": 854.0, "standingSeam": 2126.0, "tgCeiling": 1152.0, "vinylSoffit": 1188.0, "sqft": 240}, {"size": "14 x 10", "posts": 4, "wood": 4708.0, "vinyl": 5045.0, "timberwood": 5003.0, "ribbedMetal": 710.0, "standingSeam": 1496.0, "tgCeiling": 672.0, "vinylSoffit": 693.0, "sqft": 140}, {"size": "14 x 12", "posts": 4, "wood": 5066.0, "vinyl": 5325.0, "timberwood": 5449.0, "ribbedMetal": 758.0, "standingSeam": 1680.0, "tgCeiling": 806.0, "vinylSoffit": 831.6, "sqft": 168}, {"size": "14 x 14", "posts": 4, "wood": 5426.0, "vinyl": 5758.0, "timberwood": 5895.0, "ribbedMetal": 806.0, "standingSeam": 1862.0, "tgCeiling": 941.0, "vinylSoffit": 970.2, "sqft": 196}, {"size": "14 x 16", "posts": 4, "wood": 5786.0, "vinyl": 6037.0, "timberwood": 6341.0, "ribbedMetal": 854.0, "standingSeam": 2046.0, "tgCeiling": 1075.0, "vinylSoffit": 1108.8, "sqft": 224}, {"size": "14 x 18", "posts": 4, "wood": 6146.0, "vinyl": 6392.0, "timberwood": 6785.0, "ribbedMetal": 900.0, "standingSeam": 2228.0, "tgCeiling": 1210.0, "vinylSoffit": 1247.4, "sqft": 252}, {"size": "14 x 20", "posts": 6, "wood": 7404.0, "vinyl": 7620.0, "timberwood": 7997.0, "ribbedMetal": 948.0, "standingSeam": 2410.0, "tgCeiling": 1344.0, "vinylSoffit": 1386.0, "sqft": 280}, {"size": "14 x 22", "posts": 6, "wood": 7762.0, "vinyl": 7899.0, "timberwood": 8443.0, "ribbedMetal": 996.0, "standingSeam": 2594.0, "tgCeiling": 1478.0, "vinylSoffit": 1524.6, "sqft": 308}, {"size": "16 x 10", "posts": 4, "wood": 5030.0, "vinyl": 5335.0, "timberwood": 5396.0, "ribbedMetal": 774.0, "standingSeam": 1664.0, "tgCeiling": 768.0, "vinylSoffit": 792.0, "sqft": 160}, {"size": "16 x 12", "posts": 4, "wood": 5424.0, "vinyl": 5788.0, "timberwood": 5886.0, "ribbedMetal": 828.0, "standingSeam": 1870.0, "tgCeiling": 922.0, "vinylSoffit": 950.4, "sqft": 192}, {"size": "16 x 14", "posts": 4, "wood": 5818.0, "vinyl": 6087.0, "timberwood": 6376.0, "ribbedMetal": 882.0, "standingSeam": 2076.0, "tgCeiling": 1075.0, "vinylSoffit": 1108.8, "sqft": 224}, {"size": "16 x 16", "posts": 4, "wood": 6212.0, "vinyl": 6462.0, "timberwood": 6868.0, "ribbedMetal": 936.0, "standingSeam": 2280.0, "tgCeiling": 1229.0, "vinylSoffit": 1267.2, "sqft": 256}, {"size": "16 x 18", "posts": 4, "wood": 6604.0, "vinyl": 6760.0, "timberwood": 7358.0, "ribbedMetal": 988.0, "standingSeam": 2486.0, "tgCeiling": 1382.0, "vinylSoffit": 1425.6, "sqft": 288}, {"size": "16 x 20", "posts": 6, "wood": 7898.0, "vinyl": 8008.0, "timberwood": 8614.0, "ribbedMetal": 1042.0, "standingSeam": 2692.0, "tgCeiling": 1536.0, "vinylSoffit": 1584.0, "sqft": 320}, {"size": "16 x 22", "posts": 6, "wood": 8292.0, "vinyl": 8545.0, "timberwood": 9106.0, "ribbedMetal": 1096.0, "standingSeam": 2898.0, "tgCeiling": 1690.0, "vinylSoffit": 1742.4, "sqft": 352}, {"size": "16 x 24", "posts": 6, "wood": 8686.0, "vinyl": 8817.0, "timberwood": 9596.0, "ribbedMetal": 1148.0, "standingSeam": 3104.0, "tgCeiling": 1843.0, "vinylSoffit": 1900.8, "sqft": 384}, {"size": "18 x 10", "posts": 4, "wood": 5890.0, "vinyl": 5679.0, "timberwood": 6256.0, "ribbedMetal": 844.0, "standingSeam": 1834.0, "tgCeiling": 864.0, "vinylSoffit": 891.0, "sqft": 180}, {"size": "18 x 12", "posts": 4, "wood": 6368.0, "vinyl": 5997.0, "timberwood": 6829.0, "ribbedMetal": 902.0, "standingSeam": 2062.0, "tgCeiling": 1037.0, "vinylSoffit": 1069.2, "sqft": 216}, {"size": "18 x 14", "posts": 4, "wood": 6844.0, "vinyl": 6392.0, "timberwood": 7404.0, "ribbedMetal": 962.0, "standingSeam": 2290.0, "tgCeiling": 1210.0, "vinylSoffit": 1247.4, "sqft": 252}, {"size": "18 x 16", "posts": 4, "wood": 7320.0, "vinyl": 6710.0, "timberwood": 7976.0, "ribbedMetal": 1020.0, "standingSeam": 2520.0, "tgCeiling": 1382.0, "vinylSoffit": 1425.6, "sqft": 288}, {"size": "18 x 18", "posts": 4, "wood": 7798.0, "vinyl": 7029.0, "timberwood": 8549.0, "ribbedMetal": 1080.0, "standingSeam": 2748.0, "tgCeiling": 1555.0, "vinylSoffit": 1603.8, "sqft": 324}, {"size": "18 x 20", "posts": 6, "wood": 9234.0, "vinyl": 8535.0, "timberwood": 9941.0, "ribbedMetal": 1138.0, "standingSeam": 2976.0, "tgCeiling": 1728.0, "vinylSoffit": 1782.0, "sqft": 360}, {"size": "18 x 22", "posts": 6, "wood": 9712.0, "vinyl": 8826.0, "timberwood": 10516.0, "ribbedMetal": 1198.0, "standingSeam": 3206.0, "tgCeiling": 1901.0, "vinylSoffit": 1960.2, "sqft": 396}, {"size": "18 x 24", "posts": 6, "wood": 10188.0, "vinyl": 9247.0, "timberwood": 11088.0, "ribbedMetal": 1256.0, "standingSeam": 3434.0, "tgCeiling": 2074.0, "vinylSoffit": 2138.4, "sqft": 432}, {"size": "18 x 26", "posts": 6, "wood": 10664.0, "vinyl": 9566.0, "timberwood": 11661.0, "ribbedMetal": 1314.0, "standingSeam": 3662.0, "tgCeiling": 2246.0, "vinylSoffit": 2316.6, "sqft": 468}], "upgrades": {"Cupolas": [{"name": "Louvered", "wood": 250.0, "vinyl": 298.0, "timberwood": 250.0}, {"name": "Windowed", "wood": 250.0, "vinyl": 298.0, "timberwood": 250.0}], "Beams": [{"name": "Arched Beam (Per Linear Foot) - Span 1'-18' without center post", "wood": 10.0, "vinyl": 12.92, "timberwood": 0}, {"name": "Straight Beam (Per Linear Foot) - Span 18'-24' without center post", "wood": 22.5, "vinyl": 25.0, "timberwood": 0}, {"name": "Arched Beam (Per Linear Foot) - Span 18'-24' without center post", "wood": 32.5, "vinyl": 35.0, "timberwood": 0}, {"name": "Straight 8\"x10\" (Per Linear Foot)", "wood": 0, "vinyl": 0, "timberwood": 7.26}], "Trim Braces": [{"name": "Modern Trim (Per Post)", "wood": 160.0, "vinyl": 38.0, "timberwood": 0}, {"name": "8\" Square Post Trim (Per Post)", "wood": 0, "vinyl": 54.0, "timberwood": 0}], "Molding": [{"name": "Dentil Molding (Per Linear Foot)", "wood": 3.68, "vinyl": 4.34, "timberwood": 0}], "Roof": [{"name": "Flash to House (Siding) (Per Linear Foot)", "wood": 20.0, "vinyl": 30.0, "timberwood": 0}, {"name": "Attach to House (Per Linear Foot)", "wood": 40.0, "vinyl": 50.0, "timberwood": 0}], "Posts": [{"name": "Add 7\" Square", "wood": 428.0, "vinyl": 0, "timberwood": 0}, {"name": "Add 8\" Post", "wood": 0, "vinyl": 464.0, "timberwood": 352.0}, {"name": "Higher 1\" - 24\" (Per Post)", "wood": 86.0, "vinyl": 72.0, "timberwood": 40.0}, {"name": "Higher 25\" - 48\" (Per Post)", "wood": 164.0, "vinyl": 104.0, "timberwood": 80.0}, {"name": "Upgrade 9\" Square (Per Post)", "wood": 184.0, "vinyl": 0, "timberwood": 0}, {"name": "Upgrade 10\" Square (Per Post)", "wood": 0, "vinyl": 0, "timberwood": 98.0}, {"name": "Upgrade 10\" Rnd. (Per Post)Tapered Superior", "wood": 0, "vinyl": 364.0, "timberwood": 0}, {"name": "Upgrade 8\" Sq. Royal (Per Post)", "wood": 0, "vinyl": 208.0, "timberwood": 0}, {"name": "Upgrade 12\" Sq. Royal (Per Post)", "wood": 0, "vinyl": 284.0, "timberwood": 0}], "Privacy Walls- To find square feet, multiply the length of the wall by 8 (our standard height for a wall). Select 2 below for interior and exteriorwall finish. (Vinyl 4\" Dutch Lap, Pine T&G Siding, Pine Nickel Gap Siding, LP Lap Siding)": [{"name": "Privacy Wall for Pavilion", "wood": 15.0, "vinyl": 15.0, "timberwood": 15.0}], "Windows": [{"name": "24x36 AluminumSingle Hung", "wood": 88.0, "vinyl": 88.0, "timberwood": 88.0}, {"name": "30x36 AluminumSingle Hung", "wood": 106.0, "vinyl": 106.0, "timberwood": 106.0}, {"name": "30x54 AluminumSingle Hung", "wood": 128.0, "vinyl": 128.0, "timberwood": 128.0}, {"name": "24x10 AluminumTransom", "wood": 66.0, "vinyl": 66.0, "timberwood": 66.0}, {"name": "30x10 AluminumTransom", "wood": 72.0, "vinyl": 72.0, "timberwood": 72.0}], "Floor": [{"name": "Wood Floor-Pine(Sqft Pricing)", "wood": 12.0, "vinyl": 12.0, "timberwood": 12.0}, {"name": "Composite Floor (Sqft Pricing)", "wood": 16.0, "vinyl": 16.0, "timberwood": 16.0}], "Electical": [{"name": "Standard Package", "wood": 210.0, "vinyl": 210.0, "timberwood": 210.0}, {"name": "Additional (Per Unit)", "wood": 60.0, "vinyl": 60.0, "timberwood": 60.0}], "Fasteners & Brackets": [{"name": "Cortex Screws with Plugs (Per Linear Foot)", "wood": 0, "vinyl": 5.4, "timberwood": 0}], "Crickets": [{"name": "Cricket Cutout (Linear Foot)", "wood": 250.0, "vinyl": 300.0, "timberwood": 0}]}}}, "pergolas": {"classic": {"name": "Classic Pergola", "sizes": [{"size": "8 x 8", "posts": 4, "wood": 3330.0, "vinyl": 3554.0, "sqft": 64}, {"size": "8 x 10", "posts": 4, "wood": 3512.0, "vinyl": 3812.0, "sqft": 80}, {"size": "8 x 12", "posts": 4, "wood": 3692.0, "vinyl": 4070.0, "sqft": 96}, {"size": "8 x 14", "posts": 4, "wood": 3874.0, "vinyl": 4330.0, "sqft": 112}, {"size": "8 x 16", "posts": 4, "wood": 4054.0, "vinyl": 4588.0, "sqft": 128}, {"size": "10 x 10", "posts": 4, "wood": 3688.0, "vinyl": 3972.0, "sqft": 100}, {"size": "10 x 12", "posts": 4, "wood": 3888.0, "vinyl": 4236.0, "sqft": 120}, {"size": "10 x 14", "posts": 4, "wood": 4088.0, "vinyl": 4500.0, "sqft": 140}, {"size": "10 x 16", "posts": 4, "wood": 4288.0, "vinyl": 4764.0, "sqft": 160}, {"size": "10 x 18", "posts": 4, "wood": 4486.0, "vinyl": 5026.0, "sqft": 180}, {"size": "12 x 12", "posts": 4, "wood": 4084.0, "vinyl": 4400.0, "sqft": 144}, {"size": "12 x 14", "posts": 4, "wood": 4302.0, "vinyl": 4670.0, "sqft": 168}, {"size": "12 x 16", "posts": 4, "wood": 4520.0, "vinyl": 4938.0, "sqft": 192}, {"size": "12 x 18", "posts": 4, "wood": 4738.0, "vinyl": 5208.0, "sqft": 216}, {"size": "12 x 20", "posts": 6, "wood": 5988.0, "vinyl": 6342.0, "sqft": 240}, {"size": "14 x 14", "posts": 4, "wood": 4516.0, "vinyl": 4840.0, "sqft": 196}, {"size": "14 x 16", "posts": 4, "wood": 4752.0, "vinyl": 5114.0, "sqft": 224}, {"size": "14 x 18", "posts": 4, "wood": 4990.0, "vinyl": 5388.0, "sqft": 252}, {"size": "14 x 20", "posts": 6, "wood": 6246.0, "vinyl": 6528.0, "sqft": 280}, {"size": "14 x 22", "posts": 6, "wood": 6484.0, "vinyl": 6804.0, "sqft": 308}, {"size": "16 x 16", "posts": 4, "wood": 5154.0, "vinyl": 5320.0, "sqft": 256}, {"size": "16 x 18", "posts": 4, "wood": 5416.0, "vinyl": 5602.0, "sqft": 288}, {"size": "16 x 20", "posts": 6, "wood": 6744.0, "vinyl": 6746.0, "sqft": 320}, {"size": "16 x 22", "posts": 6, "wood": 7006.0, "vinyl": 7026.0, "sqft": 352}, {"size": "16 x 24", "posts": 6, "wood": 7270.0, "vinyl": 7306.0, "sqft": 384}, {"size": "18 x 18", "posts": 4, "wood": 6020.0, "vinyl": 6298.0, "sqft": 324}, {"size": "18 x 20", "posts": 6, "wood": 7428.0, "vinyl": 7534.0, "sqft": 360}, {"size": "18 x 22", "posts": 6, "wood": 7722.0, "vinyl": 7840.0, "sqft": 396}, {"size": "18 x 24", "posts": 6, "wood": 8018.0, "vinyl": 8146.0, "sqft": 432}, {"size": "18 x 26", "posts": 6, "wood": 8320.0, "vinyl": 8454.0, "sqft": 468}], "upgrades": {"Roof": [{"name": "Lattice (Per SqFt)", "classicVinyl": 4.5, "superiorVinyl": 4.5, "modernVinyl": 4.5, "classicWood": 3.0, "superiorWood": 3.0, "modernWood": 3.0}, {"name": "Cover Your Pergola (Per SqFt)", "classicVinyl": 17.0, "superiorVinyl": 17.0, "modernVinyl": 17.0, "classicWood": 17.0, "superiorWood": 17.0, "modernWood": 17.0}, {"name": "Attach to House (Per Linear Foot)", "classicVinyl": 50.0, "superiorVinyl": 50.0, "modernVinyl": 50.0, "classicWood": 40.0, "superiorWood": 40.0, "modernWood": 40.0}], "Trim Braces": [{"name": "8\" Post Ring Tim (Price Per Post)", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 54.0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}], "Molding": [{"name": "Dentil Molding per linear ft. (Modern Only)", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 4.34, "classicWood": 0, "superiorWood": 0, "modernWood": 0}], "Posts": [{"name": "Additional 5\" Sq. (Classic and Superior Only)", "classicVinyl": 220.0, "superiorVinyl": 220.0, "modernVinyl": 0, "classicWood": 308.0, "superiorWood": 308.0, "modernWood": 0}, {"name": "Upgrade 6\" Sq. Superior (Classic and Superior Only)", "classicVinyl": 98.0, "superiorVinyl": 98.0, "modernVinyl": 0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Add 7\" Sq", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 152.0, "superiorWood": 152.0, "modernWood": 514.0}, {"name": "Add 8\" Sq. Superior", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 464.0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Upgrade 8\" Sq. Superior (Classic and Superior)", "classicVinyl": 184.0, "superiorVinyl": 184.0, "modernVinyl": 0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Upgrade 8\" Sq. Royal", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 208.0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Upgrade 10\" Rnd.Tapered Superior", "classicVinyl": 0, "superiorVinyl": 394.0, "modernVinyl": 0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "1\" - 24\" Higher", "classicVinyl": 58.0, "superiorVinyl": 58.0, "modernVinyl": 72.0, "classicWood": 70.0, "superiorWood": 70.0, "modernWood": 86.0}, {"name": "24\" - 48\" Higher", "classicVinyl": 130.0, "superiorVinyl": 130.0, "modernVinyl": 104.0, "classicWood": 126.0, "superiorWood": 126.0, "modernWood": 164.0}], "Privacy Walls- To find square feet, multiply the length of the wall by 8 (our standard height for a wall). Select 2 below for interior and exteriorwall finish.": [{"name": "Pine Slatted Price per wall sq. ft. ?'l ong x 8' high (Stain Included)", "classicVinyl": 10.0, "superiorVinyl": 10.0, "modernVinyl": 10.0, "classicWood": 10.0, "superiorWood": 10.0, "modernWood": 10.0}, {"name": "Vinyl Slatted - Price per wall sq. ft. ?'long x 8'high", "classicVinyl": 16.0, "superiorVinyl": 16.0, "modernVinyl": 16.0, "classicWood": 16.0, "superiorWood": 16.0, "modernWood": 16.0}, {"name": "Vinyl T&G - Price per wall sq. ft. ?'long x 8'high", "classicVinyl": 22.0, "superiorVinyl": 22.0, "modernVinyl": 22.0, "classicWood": 22.0, "superiorWood": 22.0, "modernWood": 22.0}], "EZ Shade Canopy": [{"name": "8x8 EZShade", "classicVinyl": 1724.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 1724.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x10 EZShade", "classicVinyl": 1904.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 1904.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x12 EZShade", "classicVinyl": 1998.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 1998.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x14 EZShade", "classicVinyl": 2220.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2220.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x16 EZShade", "classicVinyl": 2430.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2430.0, "superiorWood": 0, "modernWood": 0}, {"name": "10x10 EZShade", "classicVinyl": 2220.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2220.0, "superiorWood": 0, "modernWood": 0}, {"name": "10x12 EZShade", "classicVinyl": 2393.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2393.0, "superiorWood": 0, "modernWood": 0}, {"name": "10x14 EZShade", "classicVinyl": 2660.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2660.0, "superiorWood": 0, "modernWood": 0}], "Electical": [{"name": "Standard Package", "classicVinyl": 240.0, "superiorVinyl": 240.0, "modernVinyl": 240.0, "classicWood": 0, "superiorWood": 240.0, "modernWood": 0}, {"name": "Additional (Per Unit)", "classicVinyl": 60.0, "superiorVinyl": 60.0, "modernVinyl": 60.0, "classicWood": 0, "superiorWood": 60.0, "modernWood": 0}], "Fasteners & Brackets": [{"name": "Cortex Screws with Plugs (Per Linear Foot)", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 5.4, "classicWood": 0, "superiorWood": 0, "modernWood": 0}]}}, "superior": {"name": "Superior Pergola", "sizes": [{"size": "8 x 8", "posts": 4, "wood": 2196.0, "vinyl": 3012.0, "sqft": 64}, {"size": "8 x 10", "posts": 4, "wood": 2348.0, "vinyl": 3356.0, "sqft": 80}, {"size": "8 x 12", "posts": 4, "wood": 2498.0, "vinyl": 3700.0, "sqft": 96}, {"size": "8 x 14", "posts": 4, "wood": 2650.0, "vinyl": 4044.0, "sqft": 112}, {"size": "8 x 16", "posts": 4, "wood": 2802.0, "vinyl": 4388.0, "sqft": 128}, {"size": "10 x 10", "posts": 4, "wood": 2468.0, "vinyl": 3518.0, "sqft": 100}, {"size": "10 x 12", "posts": 4, "wood": 2638.0, "vinyl": 3882.0, "sqft": 120}, {"size": "10 x 14", "posts": 4, "wood": 2808.0, "vinyl": 4248.0, "sqft": 140}, {"size": "10 x 16", "posts": 4, "wood": 2978.0, "vinyl": 4612.0, "sqft": 160}, {"size": "10 x 18", "posts": 6, "wood": 3818.0, "vinyl": 5450.0, "sqft": 180}, {"size": "12 x 12", "posts": 4, "wood": 2778.0, "vinyl": 4064.0, "sqft": 144}, {"size": "12 x 14", "posts": 4, "wood": 2966.0, "vinyl": 4450.0, "sqft": 168}, {"size": "12 x 16", "posts": 4, "wood": 3156.0, "vinyl": 4834.0, "sqft": 192}, {"size": "12 x 18", "posts": 6, "wood": 4014.0, "vinyl": 5686.0, "sqft": 216}, {"size": "12 x 20", "posts": 6, "wood": 4204.0, "vinyl": 6072.0, "sqft": 240}, {"size": "14 x 14", "posts": 4, "wood": 3124.0, "vinyl": 4652.0, "sqft": 196}, {"size": "14 x 16", "posts": 4, "wood": 3334.0, "vinyl": 5058.0, "sqft": 224}, {"size": "14 x 18", "posts": 6, "wood": 3542.0, "vinyl": 5938.0, "sqft": 252}, {"size": "14 x 20", "posts": 6, "wood": 4420.0, "vinyl": 6342.0, "sqft": 280}, {"size": "14 x 22", "posts": 6, "wood": 4628.0, "vinyl": 6748.0, "sqft": 308}, {"size": "16 x 16", "posts": 4, "wood": 3542.0, "vinyl": 5280.0, "sqft": 256}, {"size": "16 x 18", "posts": 6, "wood": 4434.0, "vinyl": 6180.0, "sqft": 288}, {"size": "16 x 20", "posts": 6, "wood": 4662.0, "vinyl": 6606.0, "sqft": 320}, {"size": "16 x 22", "posts": 6, "wood": 4890.0, "vinyl": 7032.0, "sqft": 352}, {"size": "16 x 24", "posts": 6, "wood": 5118.0, "vinyl": 7456.0, "sqft": 384}, {"size": "16 x 26", "posts": 6, "wood": 5346.0, "vinyl": 7882.0, "sqft": 416}, {"size": "16 x 28", "posts": 6, "wood": 5574.0, "vinyl": 8308.0, "sqft": 448}, {"size": "16 x 30", "posts": 6, "wood": 5802.0, "vinyl": 8734.0, "sqft": 480}, {"size": "16 x 32", "posts": 6, "wood": 6030.0, "vinyl": 9158.0, "sqft": 512}], "upgrades": {"Roof": [{"name": "Lattice (Per SqFt)", "classicVinyl": 4.5, "superiorVinyl": 4.5, "modernVinyl": 4.5, "classicWood": 3.0, "superiorWood": 3.0, "modernWood": 3.0}, {"name": "Cover Your Pergola (Per SqFt)", "classicVinyl": 17.0, "superiorVinyl": 17.0, "modernVinyl": 17.0, "classicWood": 17.0, "superiorWood": 17.0, "modernWood": 17.0}, {"name": "Attach to House (Per Linear Foot)", "classicVinyl": 50.0, "superiorVinyl": 50.0, "modernVinyl": 50.0, "classicWood": 40.0, "superiorWood": 40.0, "modernWood": 40.0}], "Trim Braces": [{"name": "8\" Post Ring Tim (Price Per Post)", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 54.0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}], "Molding": [{"name": "Dentil Molding per linear ft. (Modern Only)", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 4.34, "classicWood": 0, "superiorWood": 0, "modernWood": 0}], "Posts": [{"name": "Additional 5\" Sq. (Classic and Superior Only)", "classicVinyl": 220.0, "superiorVinyl": 220.0, "modernVinyl": 0, "classicWood": 308.0, "superiorWood": 308.0, "modernWood": 0}, {"name": "Upgrade 6\" Sq. Superior (Classic and Superior Only)", "classicVinyl": 98.0, "superiorVinyl": 98.0, "modernVinyl": 0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Add 7\" Sq", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 152.0, "superiorWood": 152.0, "modernWood": 514.0}, {"name": "Add 8\" Sq. Superior", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 464.0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Upgrade 8\" Sq. Superior (Classic and Superior)", "classicVinyl": 184.0, "superiorVinyl": 184.0, "modernVinyl": 0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Upgrade 8\" Sq. Royal", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 208.0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Upgrade 10\" Rnd.Tapered Superior", "classicVinyl": 0, "superiorVinyl": 394.0, "modernVinyl": 0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "1\" - 24\" Higher", "classicVinyl": 58.0, "superiorVinyl": 58.0, "modernVinyl": 72.0, "classicWood": 70.0, "superiorWood": 70.0, "modernWood": 86.0}, {"name": "24\" - 48\" Higher", "classicVinyl": 130.0, "superiorVinyl": 130.0, "modernVinyl": 104.0, "classicWood": 126.0, "superiorWood": 126.0, "modernWood": 164.0}], "Privacy Walls- To find square feet, multiply the length of the wall by 8 (our standard height for a wall). Select 2 below for interior and exteriorwall finish.": [{"name": "Pine Slatted Price per wall sq. ft. ?'l ong x 8' high (Stain Included)", "classicVinyl": 10.0, "superiorVinyl": 10.0, "modernVinyl": 10.0, "classicWood": 10.0, "superiorWood": 10.0, "modernWood": 10.0}, {"name": "Vinyl Slatted - Price per wall sq. ft. ?'long x 8'high", "classicVinyl": 16.0, "superiorVinyl": 16.0, "modernVinyl": 16.0, "classicWood": 16.0, "superiorWood": 16.0, "modernWood": 16.0}, {"name": "Vinyl T&G - Price per wall sq. ft. ?'long x 8'high", "classicVinyl": 22.0, "superiorVinyl": 22.0, "modernVinyl": 22.0, "classicWood": 22.0, "superiorWood": 22.0, "modernWood": 22.0}], "EZ Shade Canopy": [{"name": "8x8 EZShade", "classicVinyl": 1724.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 1724.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x10 EZShade", "classicVinyl": 1904.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 1904.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x12 EZShade", "classicVinyl": 1998.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 1998.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x14 EZShade", "classicVinyl": 2220.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2220.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x16 EZShade", "classicVinyl": 2430.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2430.0, "superiorWood": 0, "modernWood": 0}, {"name": "10x10 EZShade", "classicVinyl": 2220.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2220.0, "superiorWood": 0, "modernWood": 0}, {"name": "10x12 EZShade", "classicVinyl": 2393.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2393.0, "superiorWood": 0, "modernWood": 0}, {"name": "10x14 EZShade", "classicVinyl": 2660.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2660.0, "superiorWood": 0, "modernWood": 0}], "Electical": [{"name": "Standard Package", "classicVinyl": 240.0, "superiorVinyl": 240.0, "modernVinyl": 240.0, "classicWood": 0, "superiorWood": 240.0, "modernWood": 0}, {"name": "Additional (Per Unit)", "classicVinyl": 60.0, "superiorVinyl": 60.0, "modernVinyl": 60.0, "classicWood": 0, "superiorWood": 60.0, "modernWood": 0}], "Fasteners & Brackets": [{"name": "Cortex Screws with Plugs (Per Linear Foot)", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 5.4, "classicWood": 0, "superiorWood": 0, "modernWood": 0}]}}, "modern": {"name": "Modern Pergola", "sizes": [{"size": "8 x 8", "posts": 4, "wood": 3330.0, "vinyl": 3554.0, "sqft": 64}, {"size": "8 x 10", "posts": 4, "wood": 3512.0, "vinyl": 3812.0, "sqft": 80}, {"size": "8 x 12", "posts": 4, "wood": 3692.0, "vinyl": 4070.0, "sqft": 96}, {"size": "8 x 14", "posts": 4, "wood": 3874.0, "vinyl": 4330.0, "sqft": 112}, {"size": "8 x 16", "posts": 4, "wood": 4054.0, "vinyl": 4588.0, "sqft": 128}, {"size": "10 x 10", "posts": 4, "wood": 3688.0, "vinyl": 3972.0, "sqft": 100}, {"size": "10 x 12", "posts": 4, "wood": 3888.0, "vinyl": 4236.0, "sqft": 120}, {"size": "10 x 14", "posts": 4, "wood": 4088.0, "vinyl": 4500.0, "sqft": 140}, {"size": "10 x 16", "posts": 4, "wood": 4288.0, "vinyl": 4764.0, "sqft": 160}, {"size": "10 x 18", "posts": 4, "wood": 4486.0, "vinyl": 5026.0, "sqft": 180}, {"size": "12 x 12", "posts": 4, "wood": 4084.0, "vinyl": 4400.0, "sqft": 144}, {"size": "12 x 14", "posts": 4, "wood": 4302.0, "vinyl": 4670.0, "sqft": 168}, {"size": "12 x 16", "posts": 4, "wood": 4520.0, "vinyl": 4938.0, "sqft": 192}, {"size": "12 x 18", "posts": 4, "wood": 4738.0, "vinyl": 5208.0, "sqft": 216}, {"size": "12 x 20", "posts": 6, "wood": 5988.0, "vinyl": 6342.0, "sqft": 240}, {"size": "14 x 14", "posts": 4, "wood": 4516.0, "vinyl": 4840.0, "sqft": 196}, {"size": "14 x 16", "posts": 4, "wood": 4752.0, "vinyl": 5114.0, "sqft": 224}, {"size": "14 x 18", "posts": 4, "wood": 4990.0, "vinyl": 5388.0, "sqft": 252}, {"size": "14 x 20", "posts": 6, "wood": 6246.0, "vinyl": 6528.0, "sqft": 280}, {"size": "14 x 22", "posts": 6, "wood": 6484.0, "vinyl": 6804.0, "sqft": 308}, {"size": "16 x 16", "posts": 4, "wood": 5154.0, "vinyl": 5320.0, "sqft": 256}, {"size": "16 x 18", "posts": 4, "wood": 5416.0, "vinyl": 5602.0, "sqft": 288}, {"size": "16 x 20", "posts": 6, "wood": 6744.0, "vinyl": 6746.0, "sqft": 320}, {"size": "16 x 22", "posts": 6, "wood": 7006.0, "vinyl": 7026.0, "sqft": 352}, {"size": "16 x 24", "posts": 6, "wood": 7270.0, "vinyl": 7306.0, "sqft": 384}, {"size": "18 x 18", "posts": 4, "wood": 6020.0, "vinyl": 6298.0, "sqft": 324}, {"size": "18 x 20", "posts": 6, "wood": 7428.0, "vinyl": 7534.0, "sqft": 360}, {"size": "18 x 22", "posts": 6, "wood": 7722.0, "vinyl": 7840.0, "sqft": 396}, {"size": "18 x 24", "posts": 6, "wood": 8018.0, "vinyl": 8146.0, "sqft": 432}, {"size": "18 x 26", "posts": 6, "wood": 8320.0, "vinyl": 8454.0, "sqft": 468}], "upgrades": {"Roof": [{"name": "Lattice (Per SqFt)", "classicVinyl": 4.5, "superiorVinyl": 4.5, "modernVinyl": 4.5, "classicWood": 3.0, "superiorWood": 3.0, "modernWood": 3.0}, {"name": "Cover Your Pergola (Per SqFt)", "classicVinyl": 17.0, "superiorVinyl": 17.0, "modernVinyl": 17.0, "classicWood": 17.0, "superiorWood": 17.0, "modernWood": 17.0}, {"name": "Attach to House (Per Linear Foot)", "classicVinyl": 50.0, "superiorVinyl": 50.0, "modernVinyl": 50.0, "classicWood": 40.0, "superiorWood": 40.0, "modernWood": 40.0}], "Trim Braces": [{"name": "8\" Post Ring Tim (Price Per Post)", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 54.0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}], "Molding": [{"name": "Dentil Molding per linear ft. (Modern Only)", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 4.34, "classicWood": 0, "superiorWood": 0, "modernWood": 0}], "Posts": [{"name": "Additional 5\" Sq. (Classic and Superior Only)", "classicVinyl": 220.0, "superiorVinyl": 220.0, "modernVinyl": 0, "classicWood": 308.0, "superiorWood": 308.0, "modernWood": 0}, {"name": "Upgrade 6\" Sq. Superior (Classic and Superior Only)", "classicVinyl": 98.0, "superiorVinyl": 98.0, "modernVinyl": 0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Add 7\" Sq", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 152.0, "superiorWood": 152.0, "modernWood": 514.0}, {"name": "Add 8\" Sq. Superior", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 464.0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Upgrade 8\" Sq. Superior (Classic and Superior)", "classicVinyl": 184.0, "superiorVinyl": 184.0, "modernVinyl": 0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Upgrade 8\" Sq. Royal", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 208.0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "Upgrade 10\" Rnd.Tapered Superior", "classicVinyl": 0, "superiorVinyl": 394.0, "modernVinyl": 0, "classicWood": 0, "superiorWood": 0, "modernWood": 0}, {"name": "1\" - 24\" Higher", "classicVinyl": 58.0, "superiorVinyl": 58.0, "modernVinyl": 72.0, "classicWood": 70.0, "superiorWood": 70.0, "modernWood": 86.0}, {"name": "24\" - 48\" Higher", "classicVinyl": 130.0, "superiorVinyl": 130.0, "modernVinyl": 104.0, "classicWood": 126.0, "superiorWood": 126.0, "modernWood": 164.0}], "Privacy Walls- To find square feet, multiply the length of the wall by 8 (our standard height for a wall). Select 2 below for interior and exteriorwall finish.": [{"name": "Pine Slatted Price per wall sq. ft. ?'l ong x 8' high (Stain Included)", "classicVinyl": 10.0, "superiorVinyl": 10.0, "modernVinyl": 10.0, "classicWood": 10.0, "superiorWood": 10.0, "modernWood": 10.0}, {"name": "Vinyl Slatted - Price per wall sq. ft. ?'long x 8'high", "classicVinyl": 16.0, "superiorVinyl": 16.0, "modernVinyl": 16.0, "classicWood": 16.0, "superiorWood": 16.0, "modernWood": 16.0}, {"name": "Vinyl T&G - Price per wall sq. ft. ?'long x 8'high", "classicVinyl": 22.0, "superiorVinyl": 22.0, "modernVinyl": 22.0, "classicWood": 22.0, "superiorWood": 22.0, "modernWood": 22.0}], "EZ Shade Canopy": [{"name": "8x8 EZShade", "classicVinyl": 1724.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 1724.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x10 EZShade", "classicVinyl": 1904.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 1904.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x12 EZShade", "classicVinyl": 1998.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 1998.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x14 EZShade", "classicVinyl": 2220.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2220.0, "superiorWood": 0, "modernWood": 0}, {"name": "8x16 EZShade", "classicVinyl": 2430.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2430.0, "superiorWood": 0, "modernWood": 0}, {"name": "10x10 EZShade", "classicVinyl": 2220.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2220.0, "superiorWood": 0, "modernWood": 0}, {"name": "10x12 EZShade", "classicVinyl": 2393.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2393.0, "superiorWood": 0, "modernWood": 0}, {"name": "10x14 EZShade", "classicVinyl": 2660.0, "superiorVinyl": 0, "modernVinyl": 0, "classicWood": 2660.0, "superiorWood": 0, "modernWood": 0}], "Electical": [{"name": "Standard Package", "classicVinyl": 240.0, "superiorVinyl": 240.0, "modernVinyl": 240.0, "classicWood": 0, "superiorWood": 240.0, "modernWood": 0}, {"name": "Additional (Per Unit)", "classicVinyl": 60.0, "superiorVinyl": 60.0, "modernVinyl": 60.0, "classicWood": 0, "superiorWood": 60.0, "modernWood": 0}], "Fasteners & Brackets": [{"name": "Cortex Screws with Plugs (Per Linear Foot)", "classicVinyl": 0, "superiorVinyl": 0, "modernVinyl": 5.4, "classicWood": 0, "superiorWood": 0, "modernWood": 0}]}}}};
+        let currentType='',currentKey='',currentStructure=null,currentStep=1;
+        let quote={structure:{},upgrades:[],delivery:{},totals:{},dealerInfo:{},customerInfo:{},logo:null};
+        const ADMIN_PASSWORD='pencroft2026';
+
+        function uploadFavicon(event){
+            const file=event.target.files[0];
+            if(!file)return;
+            const reader=new FileReader();
+            reader.onload=function(e){
+                const favicon=document.getElementById('favicon');
+                favicon.href=e.target.result;
+                localStorage.setItem('pencroft_favicon',e.target.result);
+                alert('Favicon updated! Refresh to see changes.');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Load saved favicon on page load
+        window.addEventListener('DOMContentLoaded',function(){
+            const savedFavicon=localStorage.getItem('pencroft_favicon');
+            if(savedFavicon){
+                document.getElementById('favicon').href=savedFavicon;
+            }
+        });
+
+        function switchTab(tab){
+            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.structure-section').forEach(s=>s.style.display='none');
+            document.getElementById(tab+'-section').style.display='block';
+        }
+
+        function toggleAdmin(){
+            const panel=document.getElementById('adminPanel');
+            panel.classList.toggle('active');
+        }
+
+        function loginAdmin(){
+            const pwd=document.getElementById('adminPassword').value;
+            if(pwd===ADMIN_PASSWORD){
+                document.getElementById('adminContent').style.display='block';
+                alert('Admin access granted');
+            }else{
+                alert('Incorrect password');
+            }
+        }
+
+        function downloadPricingCSV(){
+            // Convert pricing data to CSV format
+            let csv = 'Structure Type,Structure Name,Size,Posts,Wood Price,Vinyl Price,Timberwood Price,Ribbed Metal,Standing Seam,T&G Ceiling,Vinyl Soffit,SqFt\n';
+            
+            // Pavilions
+            for(let key in PRICING_DATA.pavilions){
+                const structure = PRICING_DATA.pavilions[key];
+                structure.sizes.forEach(size => {
+                    csv += `Pavilion,${structure.name},"${size.size}",${size.posts},${size.wood},${size.vinyl},${size.timberwood||''},${size.ribbedMetal||''},${size.standingSeam||''},${size.tgCeiling||''},${size.vinylSoffit||''},${size.sqft}\n`;
+                });
+            }
+            
+            // Pergolas
+            for(let key in PRICING_DATA.pergolas){
+                const structure = PRICING_DATA.pergolas[key];
+                structure.sizes.forEach(size => {
+                    csv += `Pergola,${structure.name},"${size.size}",${size.posts},${size.wood},${size.vinyl},,,,,,${size.sqft}\n`;
+                });
+            }
+            
+            // Download CSV
+            const blob=new Blob([csv],{type:'text/csv'});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');
+            a.href=url;
+            a.download='pencroft-pricing-'+Date.now()+'.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('Pricing CSV downloaded! Edit in Excel or Google Sheets.');
+        }
+
+        function uploadPricingCSV(event){
+            const file=event.target.files[0];
+            if(!file)return;
+            
+            const reader=new FileReader();
+            reader.onload=function(e){
+                try{
+                    const csv = e.target.result;
+                    const lines = csv.split('\n');
+                    
+                    if(!confirm('This will replace all size pricing. Upgrades will remain unchanged. Continue?'))return;
+                    
+                    // Skip header
+                    const dataLines = lines.slice(1).filter(line => line.trim());
+                    
+                    // Clear existing sizes
+                    for(let key in PRICING_DATA.pavilions){
+                        PRICING_DATA.pavilions[key].sizes = [];
+                    }
+                    for(let key in PRICING_DATA.pergolas){
+                        PRICING_DATA.pergolas[key].sizes = [];
+                    }
+                    
+                    // Parse CSV and update pricing
+                    dataLines.forEach(line => {
+                        const cols = line.split(',').map(c => c.replace(/"/g,'').trim());
+                        if(cols.length < 8) return;
+                        
+                        const [type, name, size, posts, wood, vinyl, timberwood, ribbedMetal, standingSeam, tgCeiling, vinylSoffit, sqft] = cols;
+                        
+                        const sizeData = {
+                            size: size,
+                            posts: parseInt(posts)||0,
+                            wood: parseFloat(wood)||0,
+                            vinyl: parseFloat(vinyl)||0,
+                            sqft: parseInt(sqft)||0
+                        };
+                        
+                        // Add optional fields for pavilions
+                        if(type === 'Pavilion'){
+                            if(timberwood) sizeData.timberwood = parseFloat(timberwood);
+                            if(ribbedMetal) sizeData.ribbedMetal = parseFloat(ribbedMetal);
+                            if(standingSeam) sizeData.standingSeam = parseFloat(standingSeam);
+                            if(tgCeiling) sizeData.tgCeiling = parseFloat(tgCeiling);
+                            if(vinylSoffit) sizeData.vinylSoffit = parseFloat(vinylSoffit);
+                            
+                            // Find matching pavilion structure
+                            for(let key in PRICING_DATA.pavilions){
+                                if(PRICING_DATA.pavilions[key].name === name){
+                                    PRICING_DATA.pavilions[key].sizes.push(sizeData);
+                                    break;
+                                }
+                            }
+                        } else if(type === 'Pergola'){
+                            // Find matching pergola structure
+                            for(let key in PRICING_DATA.pergolas){
+                                if(PRICING_DATA.pergolas[key].name === name){
+                                    PRICING_DATA.pergolas[key].sizes.push(sizeData);
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    
+                    alert('Pricing updated successfully from CSV!');
+                    event.target.value = ''; // Reset file input
+                }catch(err){
+                    alert('Error parsing CSV: '+err.message+'\n\nMake sure your CSV follows the correct format.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function openCalculator(type,key){
+            currentType=type;currentKey=key;
+            currentStructure=PRICING_DATA[type][key];
+            document.getElementById('modalTitle').textContent=currentStructure.name;
+            quote={structure:{},upgrades:[],delivery:{},totals:{},dealerInfo:{},customerInfo:{},logo:null};
+            
+            const sel=document.getElementById('sizeSelect');
+            sel.innerHTML='<option value="">Choose size...</option>';
+            currentStructure.sizes.forEach((s,i)=>{
+                const price=s.wood||s.vinyl||0;
+                sel.innerHTML+=`<option value="${i}">${s.size} (${s.sqft} sqft) - from $${price.toLocaleString()}</option>`;
+            });
+            
+            currentStep=1;showStep(1);
+            document.getElementById('calculatorModal').classList.add('active');
+        }
+
+        function closeCalculator(){
+            document.getElementById('calculatorModal').classList.remove('active');
+        }
+
+        function updatePricing(){
+            const idx=document.getElementById('sizeSelect').value;
+            if(!idx)return;
+            
+            const size=currentStructure.sizes[idx];
+            quote.structure.size=size;
+            
+            const matContainer=document.getElementById('materialOptions');
+            matContainer.innerHTML='';
+            document.getElementById('materialGroup').style.display='block';
+            
+            ['wood','vinyl','timberwood'].forEach(mat=>{
+                const price=size[mat];
+                if(price>0){
+                    const card=document.createElement('div');
+                    card.className='option-card';
+                    card.innerHTML=`<div class="option-label">${mat.charAt(0).toUpperCase()+mat.slice(1)}</div><div class="option-price">$${price.toLocaleString()}</div>`;
+                    card.onclick=()=>selectMaterial(mat,price,matContainer);
+                    matContainer.appendChild(card);
+                }
+            });
+        }
+
+        function selectMaterial(material,price,container){
+            container.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected'));
+            event.target.closest('.option-card').classList.add('selected');
+            quote.structure.material=material;
+            quote.structure.materialPrice=price;
+            quote.structure.baseMaterialPrice=price;
+            quote.structure.colorModifier=null;
+            
+            // Show color selection
+            const colorSelect=document.getElementById('colorSelect');
+            const colorGroup=document.getElementById('colorGroup');
+            colorSelect.innerHTML='<option value="">Choose color/finish...</option>';
+            colorGroup.style.display='block';
+            
+            if(material==='vinyl'){
+                const vinylColors=[
+                    {name:'White Vinyl (Standard)',value:'white',modifier:0},
+                    {name:'Almond Vinyl',value:'almond',modifier:0.12},
+                    {name:'Clay Vinyl',value:'clay',modifier:0.17},
+                    {name:'Black Vinyl',value:'black',modifier:0.25}
+                ];
+                vinylColors.forEach(color=>{
+                    const opt=document.createElement('option');
+                    opt.value=JSON.stringify(color);
+                    opt.textContent=color.name+(color.modifier>0?' (+'+(color.modifier*100)+'%)':'');
+                    colorSelect.appendChild(opt);
+                });
+            }else if(material==='wood'){
+                const stainGroup=document.createElement('optgroup');
+                stainGroup.label='Stain (Included)';
+                ['Natural','Rustic Cedar','Walnut','Mahogany','Ebony','Redwood'].forEach(stain=>{
+                    const opt=document.createElement('option');
+                    opt.value=JSON.stringify({name:stain+' Stain',value:stain.toLowerCase(),type:'stain',modifier:0});
+                    opt.textContent=stain;
+                    stainGroup.appendChild(opt);
+                });
+                colorSelect.appendChild(stainGroup);
+                
+                const paintGroup=document.createElement('optgroup');
+                paintGroup.label='Paint (+20%)';
+                ['White','Buckskin','Gray','Barn Red','Black'].forEach(paint=>{
+                    const opt=document.createElement('option');
+                    opt.value=JSON.stringify({name:paint+' Paint',value:paint.toLowerCase(),type:'paint',modifier:0.20});
+                    opt.textContent=paint;
+                    paintGroup.appendChild(opt);
+                });
+                colorSelect.appendChild(paintGroup);
+            }else if(material==='timberwood'){
+                // Timberwood doesn't have color options
+                colorGroup.style.display='none';
+                loadRoofOptions();
+            }
+            
+            document.getElementById('colorPriceInfo').textContent='';
+        }
+
+        function updateColorPricing(){
+            const colorData=document.getElementById('colorSelect').value;
+            if(!colorData)return;
+            
+            const color=JSON.parse(colorData);
+            const basePrice=quote.structure.baseMaterialPrice;
+            const modifier=color.modifier;
+            const additionalCost=Math.round(basePrice*modifier);
+            const newPrice=basePrice+additionalCost;
+            
+            quote.structure.colorModifier={
+                name:color.name,
+                modifier:modifier,
+                additionalCost:additionalCost
+            };
+            quote.structure.materialPrice=newPrice;
+            
+            const priceInfo=document.getElementById('colorPriceInfo');
+            if(modifier>0){
+                priceInfo.textContent=`+$${additionalCost.toLocaleString()} (${(modifier*100)}% increase) = $${newPrice.toLocaleString()} total`;
+            }else{
+                priceInfo.textContent='Included in base price';
+            }
+            
+            // Load roof options after color is selected
+            loadRoofOptions();
+        }
+
+        function loadRoofOptions(){
+            const size=quote.structure.size;
+            
+            if(currentType==='pavilions'){
+                document.getElementById('roofGroup').style.display='block';
+                const roofContainer=document.getElementById('roofOptions');
+                roofContainer.innerHTML='';
+                quote.structure.roofUpgrade=null;
+                
+                [{name:'Architectural Shingles (included)',key:null,included:true},
+                 {name:'Ribbed Metal Roof',key:'ribbedMetal',included:false},
+                 {name:'Standing Seam Metal Roof',key:'standingSeam',included:false}].forEach(roof=>{
+                    const price=roof.key?size[roof.key]||0:0;
+                    const card=document.createElement('div');
+                    card.className='option-card'+(roof.included?' selected':'');
+                    card.innerHTML=`<div class="option-label">${roof.name}</div><div class="option-price">${roof.included?'Included':'+$'+price.toLocaleString()}</div>`;
+                    if(!roof.included){
+                        card.onclick=()=>{
+                            roofContainer.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected'));
+                            card.classList.add('selected');
+                            quote.structure.roofUpgrade={type:roof.key,name:roof.name,price:price};
+                        };
+                    }else{
+                        card.onclick=()=>{
+                            roofContainer.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected'));
+                            card.classList.add('selected');
+                            quote.structure.roofUpgrade=null;
+                        };
+                    }
+                    roofContainer.appendChild(card);
+                });
+                
+                document.getElementById('ceilingGroup').style.display='block';
+                const ceilContainer=document.getElementById('ceilingOptions');
+                ceilContainer.innerHTML='';
+                quote.structure.ceilingUpgrade=null;
+                
+                [{name:'T&G Exposed Rafters (included)',key:null,price:0},
+                 {name:'T&G Hidden Rafter Ceiling',key:'tgCeiling',price:size.tgCeiling||0},
+                 {name:'Vinyl Soffit Ceiling',key:'vinylSoffit',price:size.vinylSoffit||0}].forEach(ceil=>{
+                    const card=document.createElement('div');
+                    card.className='option-card'+(ceil.key===null?' selected':'');
+                    card.innerHTML=`<div class="option-label">${ceil.name}</div><div class="option-price">${ceil.price===0?'Included':'+$'+ceil.price.toLocaleString()}</div>`;
+                    card.onclick=()=>{
+                        ceilContainer.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected'));
+                        card.classList.add('selected');
+                        quote.structure.ceilingUpgrade=ceil.key?{type:ceil.key,name:ceil.name,price:ceil.price}:null;
+                    };
+                    ceilContainer.appendChild(card);
+                });
+            }else{
+                document.getElementById('roofGroup').style.display='none';
+                document.getElementById('ceilingGroup').style.display='none';
+            }
+        }
+
+        function showStep(step){
+            ['step1','step2','step3','step4'].forEach((s,i)=>{
+                document.getElementById(s).style.display=i+1===step?'block':'none';
+            });
+            document.getElementById('backBtn').style.display=step>1?'block':'none';
+            document.getElementById('nextBtn').textContent=step===4?'Complete Quote':'Next →';
+            if(step===2)loadUpgrades();
+            if(step===4)generateQuote();
+        }
+
+        function nextStep(){
+            if(currentStep===1){
+                if(!quote.structure.size||!quote.structure.material){
+                    alert('Please select size and material');return;
+                }
+                // Check color selection (not required for timberwood)
+                if(quote.structure.material!=='timberwood'){
+                    const colorSelect=document.getElementById('colorSelect');
+                    if(!colorSelect.value){
+                        alert('Please select a color/finish');return;
+                    }
+                }
+            }else if(currentStep===3){
+                if(!document.getElementById('deliveryOption').value){
+                    alert('Please select delivery option');return;
+                }
+            }
+            if(currentStep<4){currentStep++;showStep(currentStep);}
+            else{closeCalculator();}
+        }
+
+        function previousStep(){
+            if(currentStep>1){currentStep--;showStep(currentStep);}
+        }
+
+        function loadUpgrades(){
+            const container=document.getElementById('upgradesContainer');
+            container.innerHTML='';
+            
+            if(!currentStructure.upgrades){
+                container.innerHTML='<p style="text-align:center;color:var(--text-light);padding:2rem">No upgrades available</p>';
+                return;
+            }
+            
+            Object.entries(currentStructure.upgrades).forEach(([cat,items])=>{
+                if(!items||items.length===0)return;
+                
+                const catDiv=document.createElement('div');
+                catDiv.className='upgrade-category';
+                catDiv.innerHTML=`<div class="category-header">${cat}</div>`;
+                let hasItems=false;
+                
+                items.forEach(item=>{
+                    const mat=quote.structure.material;
+                    let price=0;
+                    
+                    if(currentType==='pavilions'){
+                        price=item[mat]||0;
+                    }else{
+                        const matKey=(currentKey.charAt(0).toUpperCase()+currentKey.slice(1))+(mat.charAt(0).toUpperCase()+mat.slice(1));
+                        price=item[matKey]||0;
+                    }
+                    
+                    if(price>0){
+                        hasItems=true;
+                        const itemDiv=document.createElement('div');
+                        const safeId=cat.replace(/[^a-zA-Z0-9]/g,'')+'-'+item.name.replace(/[^a-zA-Z0-9]/g,'');
+                        itemDiv.className='upgrade-item';
+                        itemDiv.innerHTML=`
+                            <div class="upgrade-info">
+                                <h4>${item.name}</h4>
+                                <p>$${price.toLocaleString()} each</p>
+                            </div>
+                            <div class="upgrade-controls">
+                                <input type="number" class="qty-input" value="0" min="0" onchange="updateUpgrade('${cat}','${item.name}',${price},this.value,'${safeId}')">
+                                <div class="upgrade-price" id="price-${safeId}">$0</div>
+                            </div>
+                        `;
+                        catDiv.appendChild(itemDiv);
+                    }
+                });
+                
+                if(hasItems)container.appendChild(catDiv);
+            });
+            
+            if(container.children.length===0){
+                container.innerHTML='<p style="text-align:center;color:var(--text-light);padding:2rem">No upgrades available for selected material</p>';
+            }
+        }
+
+        function updateUpgrade(cat,name,unitPrice,qty,safeId){
+            const total=unitPrice*parseFloat(qty||0);
+            document.getElementById('price-'+safeId).textContent='$'+total.toLocaleString();
+            
+            const idx=quote.upgrades.findIndex(u=>u.name===name);
+            if(idx>=0){
+                if(qty>0){quote.upgrades[idx].qty=parseFloat(qty);quote.upgrades[idx].total=total;}
+                else{quote.upgrades.splice(idx,1);}
+            }else if(qty>0){
+                quote.upgrades.push({category:cat,name,unitPrice,qty:parseFloat(qty),total});
+            }
+        }
+
+        function updateDeliveryFields(){
+            const opt=document.getElementById('deliveryOption').value;
+            document.getElementById('deliveryFields').style.display=(opt==='delivery'||opt==='installation')?'block':'none';
+            document.getElementById('customFields').style.display=opt==='custom'?'block':'none';
+            if(opt==='delivery'||opt==='installation')calculateDelivery();
+        }
+
+        function calculateDelivery(){
+            const dist=parseFloat(document.getElementById('deliveryDistance').value)||0;
+            const opt=document.getElementById('deliveryOption').value;
+            let price=0;
+            if(opt==='delivery'){
+                price=dist*8;
+            }else if(opt==='installation'){
+                const base=quote.structure.materialPrice||0;
+                price=(base*0.25)+(dist*8);
+            }
+            document.getElementById('deliveryPrice').value=price.toFixed(2);
+            quote.delivery={option:opt,distance:dist,price};
+        }
+
+        function generateQuote(){
+            const base=quote.structure.baseMaterialPrice||quote.structure.materialPrice||0;
+            const colorCost=quote.structure.colorModifier?.additionalCost||0;
+            const roof=(quote.structure.roofUpgrade?.price)||0;
+            const ceil=(quote.structure.ceilingUpgrade?.price)||0;
+            const ups=quote.upgrades.reduce((sum,u)=>sum+u.total,0);
+            
+            const delOpt=document.getElementById('deliveryOption').value;
+            let delPrice=0;
+            if(delOpt==='custom'){
+                delPrice=parseFloat(document.getElementById('customPrice').value)||0;
+            }else{
+                delPrice=quote.delivery?.price||0;
+            }
+            
+            const dealerTotal=base+colorCost+roof+ceil+ups+delPrice;
+            quote.totals.dealer=dealerTotal;
+            
+            let html=`<div class="quote-line"><span class="quote-item">Base Structure (${quote.structure.size.size} ${quote.structure.material})</span><span class="quote-price">$${base.toLocaleString()}</span></div>`;
+            
+            if(colorCost>0){
+                html+=`<div class="quote-line"><span class="quote-item">Color: ${quote.structure.colorModifier.name}</span><span class="quote-price">+$${colorCost.toLocaleString()}</span></div>`;
+            }else if(quote.structure.colorModifier){
+                html+=`<div class="quote-line"><span class="quote-item">Color: ${quote.structure.colorModifier.name}</span><span class="quote-price">Included</span></div>`;
+            }
+            
+            html+=`<div class="quote-line"><span class="quote-item">Roof: ${quote.structure.roofUpgrade?quote.structure.roofUpgrade.name:'Architectural Shingles'}</span><span class="quote-price">${roof>0?'$'+roof.toLocaleString():'Included'}</span></div>`;
+            html+=`<div class="quote-line"><span class="quote-item">Ceiling: ${quote.structure.ceilingUpgrade?quote.structure.ceilingUpgrade.name:'T&G Exposed Rafters'}</span><span class="quote-price">${ceil>0?'$'+ceil.toLocaleString():'Included'}</span></div>`;
+            
+            if(ups>0){
+                html+=`<div class="quote-line"><span class="quote-item">Additional Upgrades (${quote.upgrades.length})</span><span class="quote-price">$${ups.toLocaleString()}</span></div>`;
+            }
+            if(delPrice>0)html+=`<div class="quote-line"><span class="quote-item">Delivery/Installation</span><span class="quote-price">$${delPrice.toLocaleString()}</span></div>`;
+            html+=`<div class="quote-line"><span class="quote-item quote-total">DEALER TOTAL</span><span class="quote-price quote-total">$${dealerTotal.toLocaleString()}</span></div>`;
+            
+            document.getElementById('dealerQuote').innerHTML=html;
+            updateCustomerQuote();
+        }
+
+        function updateCustomerQuote(){
+            const markup=Math.max(35,parseFloat(document.getElementById('dealerMarkup').value)||35);
+            document.getElementById('dealerMarkup').value=markup;
+            const dealerTotal=quote.totals.dealer||0;
+            const customerTotal=dealerTotal*(1+markup/100);
+            quote.totals.customer=customerTotal;
+            quote.totals.markup=markup;
+            
+            document.getElementById('customerQuote').innerHTML=`
+                <div class="quote-line"><span class="quote-item">Dealer Cost</span><span class="quote-price">$${dealerTotal.toLocaleString()}</span></div>
+                <div class="quote-line"><span class="quote-item">Markup (${markup}%)</span><span class="quote-price">+$${(customerTotal-dealerTotal).toLocaleString()}</span></div>
+                <div class="quote-line"><span class="quote-item quote-total">CUSTOMER PRICE</span><span class="quote-price quote-total">$${customerTotal.toLocaleString()}</span></div>
+            `;
+        }
+
+        function showQuoteDetails(){
+            document.getElementById('quoteDetailsModal').classList.add('active');
+        }
+
+        function closeQuoteDetails(){
+            document.getElementById('quoteDetailsModal').classList.remove('active');
+        }
+
+        function handleLogoUpload(event){
+            const file=event.target.files[0];
+            if(!file)return;
+            const reader=new FileReader();
+            reader.onload=function(e){
+                quote.logo=e.target.result;
+                const preview=document.getElementById('logoPreview');
+                preview.src=e.target.result;
+                preview.style.display='block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function generateFormattedQuote(){
+            quote.dealerInfo={
+                company:document.getElementById('dealerCompany').value,
+                contact:document.getElementById('dealerContact').value,
+                email:document.getElementById('dealerEmail').value,
+                phone:document.getElementById('dealerPhone').value
+            };
+            quote.customerInfo={
+                name:document.getElementById('customerName').value,
+                email:document.getElementById('customerEmail').value,
+                phone:document.getElementById('customerPhone').value,
+                address:document.getElementById('customerAddress').value
+            };
+            
+            let quoteHTML=`<!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Quote - ${currentStructure.name}</title>
+                    <style>
+                        body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:20px}
+                        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;border-bottom:3px solid #2C5F2D;padding-bottom:20px}
+                        .logo{max-width:200px;max-height:100px}
+                        h1{color:#2C5F2D;margin:0}
+                        .info-section{margin:20px 0}
+                        .info-section h3{color:#2C5F2D;margin-bottom:10px}
+                        .info-section p{line-height:1.6}
+                        table{width:100%;border-collapse:collapse;margin:20px 0}
+                        th,td{padding:12px;text-align:left;border-bottom:1px solid #ddd}
+                        th{background:#2C5F2D;color:white}
+                        .total-row{font-weight:bold;font-size:1.2em;background:#f0f0f0}
+                        .footer{margin-top:40px;padding-top:20px;border-top:2px solid #ddd;font-size:0.9em;color:#666}
+                        @media print{
+                            body{margin:0;padding:20px}
+                            .no-print{display:none}
+                        }
+                    </style>
+                </head>
+                <body>
+                    <button class="no-print" onclick="window.print()" style="padding:10px 20px;background:#2C5F2D;color:white;border:none;border-radius:5px;cursor:pointer;margin-bottom:20px">🖨️ Print Quote</button>
+                    
+                    <div class="header">
+                        ${quote.logo?'<img src="'+quote.logo+'" class="logo" alt="Logo">':'<div></div>'}
+                        <div style="text-align:right">
+                            <h1>QUOTE</h1>
+                            <p>Date: ${new Date().toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3>From:</h3>
+                        <p><strong>${quote.dealerInfo.company||'Your Company'}</strong><br>
+                        ${quote.dealerInfo.contact||''}<br>
+                        ${quote.dealerInfo.email||''}<br>
+                        ${quote.dealerInfo.phone||''}</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3>To:</h3>
+                        <p><strong>${quote.customerInfo.name||'Customer Name'}</strong><br>
+                        ${quote.customerInfo.email||''}<br>
+                        ${quote.customerInfo.phone||''}<br>
+                        ${quote.customerInfo.address||''}</p>
+                    </div>
+                    
+                    <h3>Structure Details:</h3>
+                    <table>
+                        <tr><th>Description</th><th style="text-align:right">Price</th></tr>
+                        <tr><td><strong>${currentStructure.name}</strong> - ${quote.structure.size.size} (${quote.structure.size.sqft} sqft)</td><td style="text-align:right">$${quote.structure.baseMaterialPrice.toLocaleString()}</td></tr>
+                        <tr><td>Material: ${quote.structure.material.charAt(0).toUpperCase()+quote.structure.material.slice(1)}</td><td style="text-align:right">-</td></tr>
+                        ${quote.structure.colorModifier?'<tr><td>Color/Finish: '+quote.structure.colorModifier.name+'</td><td style="text-align:right">'+(quote.structure.colorModifier.additionalCost>0?'$'+quote.structure.colorModifier.additionalCost.toLocaleString():'Included')+'</td></tr>':''}
+                        <tr><td>Roof: ${quote.structure.roofUpgrade?quote.structure.roofUpgrade.name:'Architectural Shingles'}</td><td style="text-align:right">${quote.structure.roofUpgrade?'$'+quote.structure.roofUpgrade.price.toLocaleString():'Included'}</td></tr>
+                        <tr><td>Ceiling: ${quote.structure.ceilingUpgrade?quote.structure.ceilingUpgrade.name:'T&G Exposed Rafters'}</td><td style="text-align:right">${quote.structure.ceilingUpgrade?'$'+quote.structure.ceilingUpgrade.price.toLocaleString():'Included'}</td></tr>
+                        ${quote.upgrades.map(u=>'<tr><td>'+u.name+' (Qty: '+u.qty+')</td><td style="text-align:right">$'+u.total.toLocaleString()+'</td></tr>').join('')}
+                        ${quote.delivery.price>0?'<tr><td>Delivery/Installation ('+quote.delivery.option+')</td><td style="text-align:right">$'+quote.delivery.price.toLocaleString()+'</td></tr>':''}
+                        <tr class="total-row"><td><strong>TOTAL PRICE</strong></td><td style="text-align:right"><strong>$${quote.totals.customer.toLocaleString()}</strong></td></tr>
+                    </table>
+                    
+                    <div class="footer">
+                        <p>This quote is valid for 30 days from the date above. Terms and conditions apply.</p>
+                        <p>Thank you for your business!</p>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            // Create blob and download as HTML file
+            const blob=new Blob([quoteHTML],{type:'text/html'});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');
+            a.href=url;
+            a.download='quote-'+currentStructure.name.replace(/\s/g,'-')+'-'+Date.now()+'.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            closeQuoteDetails();
+            alert('Quote saved! Open the downloaded HTML file to view, print, or save as PDF.');
+        }
+
+        function emailQuote(){
+            showQuoteDetails();
+        }
+
+        function placeOrder(){
+            if(!confirm('This will generate an order form to send to Pencroft. Continue?'))return;
+            
+            let orderDetails=`
+PENCROFT ORDER
+
+Order Date: ${new Date().toLocaleDateString()}
+
+DEALER INFORMATION:
+Company: [Your company name]
+Contact: [Your name]
+Email: [Your email]
+Phone: [Your phone]
+
+CUSTOMER INFORMATION:
+Name: [Customer name]
+Email: [Customer email]
+Phone: [Customer phone]
+Address: [Customer address]
+
+STRUCTURE DETAILS:
+${currentStructure.name}
+Size: ${quote.structure.size.size}
+Material: ${quote.structure.material}
+Roof: ${quote.structure.roofUpgrade?quote.structure.roofUpgrade.name:'Architectural Shingles'}
+Ceiling: ${quote.structure.ceilingUpgrade?quote.structure.ceilingUpgrade.name:'T&G Exposed Rafters'}
+
+${quote.upgrades.length>0?'UPGRADES:\n'+quote.upgrades.map(u=>u.name+' (Qty: '+u.qty+') - $'+u.total.toLocaleString()).join('\n'):''}
+
+DELIVERY: ${quote.delivery.option} ${quote.delivery.distance?'('+quote.delivery.distance+' miles)':''}
+
+PRICING:
+Dealer Cost: $${quote.totals.dealer.toLocaleString()}
+Customer Price: $${quote.totals.customer.toLocaleString()}
+            `;
+            
+            const blob=new Blob([orderDetails],{type:'text/plain'});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');
+            a.href=url;
+            a.download='pencroft-order-'+Date.now()+'.txt';
+            a.click();
+            
+            alert('Order form downloaded! Please fill in the required information and email to Pencroft.');
+        }
+
+        // ============================================
+        // PASSWORD PROTECTION
+        // ============================================
+        const CALCULATOR_PASSWORD = 'dealer2026'; // ← Change this to your desired password
+        
+        function checkPassword() {
+            const input = document.getElementById('passwordInput');
+            const error = document.getElementById('passwordError');
+            const overlay = document.getElementById('passwordOverlay');
+            
+            if (input.value === CALCULATOR_PASSWORD) {
+                // Correct password
+                overlay.classList.add('hidden');
+                document.body.classList.remove('locked');
+                sessionStorage.setItem('calculatorAccess', 'granted');
+            } else {
+                // Wrong password
+                error.classList.add('show');
+                input.value = '';
+                input.focus();
+                setTimeout(() => {
+                    error.classList.remove('show');
+                }, 3000);
+            }
+        }
+        
+        // Check if user already logged in this session
+        window.addEventListener('DOMContentLoaded', () => {
+            const hasAccess = sessionStorage.getItem('calculatorAccess');
+            if (hasAccess === 'granted') {
+                document.getElementById('passwordOverlay').classList.add('hidden');
+                document.body.classList.remove('locked');
+            }
+        });
+        
+        // Allow Enter key to submit password
+        document.getElementById('passwordInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+    </script>
+</body>
+</html>
