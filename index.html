@@ -69,8 +69,8 @@
         .quote-item{font-weight:500}
         .quote-price{font-weight:600;color:var(--accent)}
         .quote-total{font-size:1.5rem;font-family:'DM Serif Display',serif}
-        .dealer-quote{background:linear-gradient(135deg,#E8F5E9 0%,#C8E6C9 100%);border-radius:16px;padding:2rem;margin-top:1.5rem}
-        .dealer-quote .quote-header{color:var(--primary)}
+        .-quote{background:linear-gradient(135deg,#E8F5E9 0%,#C8E6C9 100%);border-radius:16px;padding:2rem;margin-top:1.5rem}
+        .-quote .quote-header{color:var(--primary)}
         .quote-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:2rem}
         .logo-upload{border:2px dashed var(--border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all .3s}
         .logo-upload:hover{border-color:var(--primary);background:rgba(44,95,45,0.02)}
@@ -2284,7 +2284,7 @@ Customer Price: $${quote.totals.customer.toLocaleString()}
         // ============================================
         // PASSWORD PROTECTION
         // ============================================
-        const CALCULATOR_PASSWORD = 'dealer2026'; // ← Change this to your desired password
+        const CALCULATOR_PASSWORD = 'PenCroftDealer'; // ← Change this to your desired password
         
         function checkPassword() {
             const input = document.getElementById('passwordInput');
